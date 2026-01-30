@@ -1,0 +1,190 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap');
+
+.destinations-section {
+    padding: 3rem 1rem;
+    background-color: #f8fbff;
+    /* Very light blueish background similar to image */
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+}
+
+.destinations-container {
+    max-width: 1400px;
+    /* Wider container for 6 items */
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* ==================
+   Header Styling
+   ================== */
+.destinations-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    gap: 2rem;
+}
+
+.header-left {
+    max-width: 800px;
+    position: relative;
+    padding-left: 20px;
+}
+
+/* The vertical orange bar logic */
+.header-left::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 5px;
+    /* Offset to align with H2 text */
+    bottom: 0;
+    width: 4px;
+    height: 90%;
+    /* Adjust height to cover title lines */
+    background-color: #ff7b29;
+    /* Orange accent */
+    border-radius: 2px;
+}
+
+.section-title {
+    font-size: 1.75rem;
+    color: #555;
+    /* Slightly lighter gray for 'Best' */
+    font-weight: 400;
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+}
+
+.section-title span.highlight {
+    font-weight: 700;
+    color: #222;
+    /* Darker for the highlighted part */
+}
+
+/* Adjusting to match "Best International Tourist Places to Visit" 
+   Logic: "Best" is light, "International..." is bold/dark.
+*/
+
+.section-subtitle {
+    font-size: 0.95rem;
+    color: #777;
+    margin-top: 0.5rem;
+    line-height: 1.6;
+    font-size: 1rem;
+    font-family: 'DM Serif Display', serif;
+}
+
+/* ==================
+   Arrows Styling
+   ================== */
+.header-arrows {
+    display: flex;
+    gap: 10px;
+    padding-top: 0.5rem;
+    /* Align with title */
+}
+
+.arrow-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background-color: #bcbcbc;
+    /* Gray background */
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.arrow-btn:hover {
+    background-color: #ff7b29;
+    /* Orange on hover */
+    transform: scale(1.05);
+}
+
+/* ==================
+   Slider Styling
+   ================== */
+.carousel-wrapper {
+    margin: 0 -10px;
+    /* Negative margin to offset padding on slides */
+}
+
+/* Slide Container */
+.destination-slide {
+    padding: 0 10px;
+    /* Spacing between pills */
+    box-sizing: border-box;
+}
+
+.pill-card {
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.pill-card:hover {
+    transform: translateY(-5px);
+}
+
+/* The Oval Image Container */
+.image-container {
+    width: 100%;
+    /* Aspect ratio for a pill shape (tall) */
+    aspect-ratio: 3 / 4.5;
+    border-radius: 999px;
+    /* Max border radius for pill shape */
+    overflow: hidden;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    position: relative;
+    background: #e0e0e0;
+}
+
+.image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.pill-card:hover .image-container img {
+    transform: scale(1.1);
+}
+
+.place-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+/* ==================
+   Responsiveness
+   ================== */
+@media (max-width: 768px) {
+    .destinations-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .header-left::before {
+        height: 100%;
+        top: 0;
+    }
+
+    .header-arrows {
+        align-self: flex-end;
+        /* Move arrows to right on mobile? Or keep left? */
+        /* Let's keep them accessible */
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
