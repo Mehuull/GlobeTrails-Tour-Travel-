@@ -6,8 +6,8 @@ const connectDB = async () => {
     if (mongoose.connection.readyState >= 1) return;
 
     try {
-        if (!process.env.MONGO_URI) {
-            throw new Error("MONGO_URI is not defined in environment variables");
+        if (!process.env.MONGO_URI || typeof process.env.MONGO_URI !== 'string') {
+            throw new Error("MONGO_URI is missing or invalid in environment variables");
         }
 
         // Use the URI exactly as provided, or append db name safely
