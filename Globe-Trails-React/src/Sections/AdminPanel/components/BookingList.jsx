@@ -11,7 +11,7 @@ const BookingList = () => {
             const token = localStorage.getItem("accessToken");
             // Although we made the route public/unprotected in routes for now, good practice to send it
             // checking backend routes again... router.get("/", getAllBookings) is there.
-            const res = await axios.get("http://localhost:8000/bookings", {
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/bookings`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.data.success) {
@@ -30,7 +30,7 @@ const BookingList = () => {
     const handleStatusUpdate = async (id, status) => {
         try {
             const token = localStorage.getItem("accessToken");
-            await axios.put(`http://localhost:8000/bookings/${id}`,
+            await axios.put(`${import.meta.env.VITE_API_URL}/bookings/${id}`,
                 { status },
                 { headers: { Authorization: `Bearer ${token}` } }
             );

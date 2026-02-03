@@ -13,7 +13,7 @@ const Tours = () => {
     const fetchTours = async () => {
       setLoading(true);
       try {
-        const res = await axios.get(`http://localhost:8000/tours${search}`);
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/tours${search}`);
         if (res.data.success) {
           setTours(res.data.data);
         }

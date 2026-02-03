@@ -70,9 +70,8 @@
 //     }
 
 
-//     try {
 //       const response = await axios.put(
-//         'http://localhost:5000/api/user/change-password',
+//         `${import.meta.env.VITE_API_URL}/api/user/change-password`,
 //         {
 //           currentPassword: passwordData.currentPassword,
 //           newPassword: passwordData.newPassword,
@@ -109,7 +108,7 @@
 //     e.preventDefault();
 //     try {
 //       const response = await axios.put(
-//         `http://localhost:5000/api/user/${user.id}`,
+//         `${import.meta.env.VITE_API_URL}/api/user/${user.id}`,
 //         formData,
 //         {
 //           headers: {
@@ -137,7 +136,7 @@
 
 //     if (!confirmDelete) return;
 //     try {
-//       await axios.delete(`http://localhost:5000/api/user/${user.id}`, {
+//       await axios.delete(`${import.meta.env.VITE_API_URL}/api/user/${user.id}`, {
 //         headers: {
 //           Authorization: `Bearer ${token}`,
 //         },
@@ -194,7 +193,7 @@
 //                 onChange={handlePasswordChange}
 //                 required
 //               /> 
-              
+
 //               <button type="submit" className="save-btn">Update Password</button>
 //             </form>*}
 //              <form onSubmit={handleChangePassword} className="space-y-5">
@@ -440,7 +439,7 @@ const UserProfile = () => {
 
     try {
       const response = await axios.put(
-        'http://localhost:5000/api/user/change-password',
+        `${import.meta.env.VITE_API_URL}/api/user/change-password`,
         {
           currentPassword: passwordData.currentPassword,
           newPassword: passwordData.newPassword,
@@ -477,7 +476,7 @@ const UserProfile = () => {
     e.preventDefault();
     try {
       const response = await axios.put(
-        `http://localhost:5000/api/user/${user.id}`,
+        `${import.meta.env.VITE_API_URL}/api/user/${user.id}`,
         formData,
         {
           headers: {
@@ -505,7 +504,7 @@ const UserProfile = () => {
 
     if (!confirmDelete) return;
     try {
-      await axios.delete(`http://localhost:5000/api/user/${user.id}`, {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/user/${user.id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

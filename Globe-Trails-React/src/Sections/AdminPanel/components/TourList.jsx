@@ -8,7 +8,7 @@ const TourList = ({ setActiveTab, setEditingTour }) => {
 
     const fetchTours = async () => {
         try {
-            const res = await axios.get("http://localhost:8000/tours");
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/tours`);
             if (res.data.success) {
                 setTours(res.data.data);
             }
@@ -25,7 +25,7 @@ const TourList = ({ setActiveTab, setEditingTour }) => {
         if (!window.confirm("Are you sure you want to delete this tour?")) return;
         try {
             // Add auth header if needed later
-            await axios.delete(`http://localhost:8000/tours/${id}`);
+            await axios.delete(`${import.meta.env.VITE_API_URL}/tours/${id}`);
             toast.success("Tour deleted successfully");
             fetchTours();
         } catch (error) {

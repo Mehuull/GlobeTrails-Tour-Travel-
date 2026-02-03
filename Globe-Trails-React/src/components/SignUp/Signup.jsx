@@ -70,7 +70,7 @@ const Signup = () => {
       setIsLoading(true);
       const { confirmPassword, ...submitData } = formData;
 
-      const res = await axios.post(`http://localhost:8000/user/register`, submitData, {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/user/register`, submitData, {
         headers: { "Content-Type": "application/json" }
       });
 
@@ -101,7 +101,7 @@ const Signup = () => {
             <div className="logo">voyger</div>
             <h1 className="auth-heading">Join the <br /> Adventure</h1>
 
-            {/* <button className="google-wide-btn" onClick={() => window.open("http://localhost:8000/auth/google", "_self")}>
+            {/* <button className="google-wide-btn" onClick={() => window.open(`${import.meta.env.VITE_API_URL}/auth/google`, "_self")}>
             <GoogleLogo />
             <span>Sign up with Google</span>
           </button>

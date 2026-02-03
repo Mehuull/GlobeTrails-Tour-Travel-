@@ -170,10 +170,10 @@ const AddTour = ({ editingTour, setEditingTour, setActiveTab }) => {
             // Express handles this mix well usually.
 
             if (editingTour) {
-                await axios.put(`http://localhost:8000/tours/${editingTour._id}`, data);
+                await axios.put(`${import.meta.env.VITE_API_URL}/tours/${editingTour._id}`, data);
                 toast.success("Tour updated successfully");
             } else {
-                await axios.post("http://localhost:8000/tours", data, {
+                await axios.post(`${import.meta.env.VITE_API_URL}/tours`, data, {
                     headers: { "Content-Type": "multipart/form-data" }
                 });
                 toast.success("Tour created successfully");

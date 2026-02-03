@@ -145,7 +145,7 @@ const TourUploadForm = () => {
   //   });
   //      // ✅ Send everything in one request
   //     const response = await fetch(
-  //       "http://localhost:5000/api/tours/create",
+  //       `${import.meta.env.VITE_API_URL}/api/tours/create`,
   //       {
   //         method: "POST",
   //         body: formData, // ✅ Send as FormData
@@ -193,7 +193,7 @@ const TourUploadForm = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/tours/create", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tours/create`, {
         method: "POST",
         body: fullFormData,
       });

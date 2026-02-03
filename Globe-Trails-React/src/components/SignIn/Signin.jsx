@@ -59,7 +59,7 @@
 
 //     try {
 //       // API call to backend
-//       const response = await fetch("http://localhost:5000/api/auth/signin", {
+//       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/signin`, {
 //         method: "POST",
 //         headers: {
 //           "Content-Type": "application/json",
@@ -304,7 +304,7 @@ const Signin = () => {
 
     try {
       setIsLoading(true);
-      const res = await axios.post(`http://localhost:8000/user/login`, formData, {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/user/login`, formData, {
         headers: { "Content-Type": "application/json" }
       });
 
@@ -347,7 +347,7 @@ const Signin = () => {
             <h1 className="auth-heading">Start your <br /> perfect trip</h1>
 
             {/* New Standard Google Button */}
-            <button className="google-wide-btn" onClick={() => window.open("http://localhost:8000/auth/google", "_self")}>
+            <button className="google-wide-btn" onClick={() => window.open(`${import.meta.env.VITE_API_URL}/auth/google`, "_self")}>
               <GoogleLogo />
               <span>Continue with Google</span>
             </button>

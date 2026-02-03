@@ -33,7 +33,7 @@ const Profile = () => {
         const fetchMyBookings = async () => {
             try {
                 const token = localStorage.getItem('accessToken');
-                const res = await axios.get("http://localhost:8000/bookings/my-bookings", {
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/bookings/my-bookings`, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
@@ -57,7 +57,7 @@ const Profile = () => {
 
         try {
             const token = localStorage.getItem('accessToken');
-            const res = await axios.delete(`http://localhost:8000/bookings/${bookingId}`, {
+            const res = await axios.delete(`${import.meta.env.VITE_API_URL}/bookings/${bookingId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }

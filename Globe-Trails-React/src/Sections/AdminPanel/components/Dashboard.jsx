@@ -13,13 +13,13 @@ const Dashboard = () => {
         const fetchDashboardData = async () => {
             try {
                 // Fetch Stats
-                const statsRes = await axios.get("http://localhost:8000/admin/stats");
+                const statsRes = await axios.get(`${import.meta.env.VITE_API_URL}/admin/stats`);
                 if (statsRes.data.success) {
                     setStats(statsRes.data.stats);
                 }
 
                 // Fetch Recent Inquiries (Bookings)
-                const bookingsRes = await axios.get("http://localhost:8000/bookings");
+                const bookingsRes = await axios.get(`${import.meta.env.VITE_API_URL}/bookings`);
                 if (bookingsRes.data.success) {
                     // Get only first 5 for dashboard
                     setRecentBookings(bookingsRes.data.data.slice(0, 5));

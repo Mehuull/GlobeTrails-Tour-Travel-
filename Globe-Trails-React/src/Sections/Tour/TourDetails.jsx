@@ -29,7 +29,7 @@ const TourDetails = () => {
     useEffect(() => {
         const fetchTour = async () => {
             try {
-                const res = await axios.get(`http://localhost:8000/tours/${id}`);
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/tours/${id}`);
                 if (res.data.success) {
                     setTour(res.data.data);
                 }
@@ -47,7 +47,7 @@ const TourDetails = () => {
             if (!user || !id) return;
             try {
                 const tokens = localStorage.getItem('accessToken');
-                const res = await axios.get("http://localhost:8000/bookings/my-bookings", {
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/bookings/my-bookings`, {
                     headers: { Authorization: `Bearer ${tokens}` }
                 });
                 if (res.data.success) {
@@ -100,7 +100,7 @@ const TourDetails = () => {
             };
 
             const tokens = localStorage.getItem('accessToken'); // Retrieve token for auth
-            const res = await axios.post("http://localhost:8000/bookings", payload, {
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/bookings`, payload, {
                 headers: {
                     Authorization: `Bearer ${tokens}`
                 }
