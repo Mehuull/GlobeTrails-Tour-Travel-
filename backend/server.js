@@ -40,9 +40,13 @@ app.use('/admin', adminRoute)
 // http://localhost:8000/user/register
 
 
-app.listen(PORT, () => {
-    connectDB()
-    console.log(`Server is listening at port ${PORT}`);
-})
+// Connect to MongoDB
+connectDB()
+
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => {
+        console.log(`Server is listening at port ${PORT}`);
+    })
+}
 
 export default app;

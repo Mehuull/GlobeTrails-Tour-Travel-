@@ -3,13 +3,25 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const connectDB = async () => {
+    if (mongoose.connection.readyState >= 1) return;
+
     try {
-        await mongoose.connect(`${process.env.MONGO_URI}/GlobeTrails`)
+        if (!process.env.MONGO_URI) {
+            throw new Error("MONGO_URI is not defined in environment variables");
+        }
+
+        // Use the URI exactly as provided, or append db name safely
+        const uri = process.env.MONGO_URI.includes('?')
+            ? process.env.MONGO_URI.replace(/\/\?/, '/GlobeTrails?')
+            : `${process.env.MONGO_URI}/GlobeTrails`;
+
+        await mongoose.connect(uri);
         console.log('MongoDB connected successfully');
 
     } catch (error) {
-        console.log('MongoDb connection error', error);
-
+        console.error('MongoDB connection error:', error.message);
+        // Throw the error so the calling function knows we failed
+        throw error;
     }
 }
 
