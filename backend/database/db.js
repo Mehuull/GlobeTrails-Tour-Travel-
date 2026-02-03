@@ -10,11 +10,35 @@ const connectDB = async () => {
             throw new Error("MONGO_URI is missing or invalid in environment variables");
         }
 
-        // Use the URI exactly as provided, or append db name safely
-        const uri = process.env.MONGO_URI.includes('?')
-            ? process.env.MONGO_URI.replace(/\/\?/, '/GlobeTrails?')
-            : `${process.env.MONGO_URI}/GlobeTrails`;
+        // Clean trailing slash and append DB name
+        let baseUri = process.env.MONGO_URI.trim();
+        if (baseUri.endsWith('/')) {
+            baseUri = baseUri.slice(0, -1);
+        }
 
+        // If it already has a database name in the path (after the host), don't append GlobeTrails
+        // A simple check: if there is a / after the protocol's //
+        const parts = baseUri.split('/');
+        // mongodb+srv://host or mongodb://host
+        // parts[0] is protocol, parts[1] is empty, parts[2] is host[:port]
+        // If parts.length > 3, it might already have a DB name.
+
+        let uri;
+        if (parts.length > 3 && parts[3].length > 0) {
+            uri = baseUri; // Use as is
+        } else {
+            uri = `${baseUri}/GlobeTrails`;
+        }
+
+        // Handle query parameters if they were present
+        if (process.env.MONGO_URI.includes('?')) {
+            const query = process.env.MONGO_URI.split('?')[1];
+            if (!uri.includes('?')) {
+                uri = `${uri}?${query}`;
+            }
+        }
+
+        console.log('Connecting to MongoDB...');
         await mongoose.connect(uri);
         console.log('MongoDB connected successfully');
 

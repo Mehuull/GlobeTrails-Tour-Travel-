@@ -9,40 +9,42 @@ import adminRoute from "./routes/adminRoutes.js"
 import cors from 'cors'
 import "./config/passport.js"
 
-const app = express()
+import mongoose from "mongoose";
 
+const app = express()
 const PORT = process.env.PORT || 3000
 
-app.use(express.json())
-
+// 1. GLOBAL CORS (Highest Priority)
 const allowedOrigins = [
     "http://localhost:5173",
     "https://globetrails.netlify.app"
 ];
 
-// Manual CORS middleware as a fallback
 app.use((req, res, next) => {
     const origin = req.headers.origin;
     if (origin && (allowedOrigins.includes(origin) || origin.endsWith('.netlify.app') || origin.endsWith('.vercel.app'))) {
         res.setHeader('Access-Control-Allow-Origin', origin);
         res.setHeader('Access-Control-Allow-Credentials', 'true');
-        res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
-        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     }
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
     if (req.method === 'OPTIONS') {
-        return res.sendStatus(200);
+        return res.status(200).end();
     }
     next();
 });
 
-// Middleware to ensure DB is connected
+app.use(express.json())
+
+// 2. DATABASE READINESS
 app.use(async (req, res, next) => {
     try {
         await connectDB();
         next();
     } catch (err) {
-        console.error("DB Middleware Error:", err.message);
-        res.status(500).json({
+        console.error("DB Connection Error:", err.message);
+        return res.status(500).json({
             success: false,
             message: "Database connection failed",
             error: err.message
@@ -50,38 +52,42 @@ app.use(async (req, res, next) => {
     }
 });
 
-// Root route for connection testing
-app.get('/', (req, res) => {
+// 3. DIAGNOSTICS
+app.get('/', async (req, res) => {
+    let toursCount = 0;
+    try {
+        const { Tour } = await import("./models/Tour.js");
+        toursCount = await Tour.countDocuments();
+    } catch (e) {
+        console.error("Diagnostic error:", e.message);
+    }
+
     res.json({
         message: "GlobeTrails API is running",
-        version: "1.0.2",
-        dbStatus: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
-        origin: req.headers.origin || "no origin"
+        version: "1.0.3",
+        db: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+        toursInDB: toursCount,
+        originDetected: req.headers.origin || "none"
     });
 });
 
+// 4. ROUTES
 app.use('/auth', authRoute)
 app.use('/user', userRoute)
 app.use('/tours', tourRoute)
 app.use('/bookings', bookingRoute)
 app.use('/admin', adminRoute)
 
-// Global Error Handler
+// 5. ERROR HANDLING
 app.use((err, req, res, next) => {
-    console.error("Unhandled Error:", err.stack);
+    console.error("APP ERROR:", err.stack);
     res.status(err.status || 500).json({
         success: false,
-        message: err.message || "Internal Server Error",
+        message: err.message || "Internal Server Error"
     });
 });
 
-// http://localhost:8000/user/register
-
-import mongoose from "mongoose";
-
-// Initial connection attempt
-connectDB().catch(err => console.error("Initial DB connection failed:", err.message));
-
+// Initializing server
 if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, () => {
         console.log(`Server is listening at port ${PORT}`);
