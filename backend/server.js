@@ -8,89 +8,91 @@ import bookingRoute from "./routes/bookingRoutes.js"
 import adminRoute from "./routes/adminRoutes.js"
 import cors from 'cors'
 import "./config/passport.js"
-
 import mongoose from "mongoose";
 
 const app = express()
 const PORT = process.env.PORT || 3000
 
-// 1. GLOBAL CORS (Highest Priority)
+// 1. CORS Setup (Simplified for maximum compatibility)
 const allowedOrigins = [
     "http://localhost:5173",
     "https://globetrails.netlify.app"
 ];
 
-app.use((req, res, next) => {
-    const origin = req.headers.origin;
-    if (origin && (allowedOrigins.includes(origin) || origin.endsWith('.netlify.app') || origin.endsWith('.vercel.app'))) {
-        res.setHeader('Access-Control-Allow-Origin', origin);
-        res.setHeader('Access-Control-Allow-Credentials', 'true');
-    }
-    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
-    if (req.method === 'OPTIONS') {
-        return res.status(200).end();
-    }
-    next();
-});
+app.use(cors({
+    origin: function (origin, callback) {
+        // If origin is in whitelist or is a netlify/vercel preview, allow it
+        if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.netlify.app') || origin.endsWith('.vercel.app')) {
+            callback(null, true);
+        } else {
+            console.log("CORS blocked origin:", origin);
+            callback(null, true); // Fallback: allow for debugging, or you can use callback(new Error('CORS'));
+        }
+    },
+    credentials: true
+}));
 
 app.use(express.json())
 
-// 2. DATABASE READINESS
+// 2. DATABASE READINESS MIDDLEWARE
 app.use(async (req, res, next) => {
     try {
         await connectDB();
         next();
     } catch (err) {
-        console.error("DB Connection Error:", err.message);
+        console.error("Critical DB Error:", err.message);
+        // On Vercel, we want to see the error in the response temporarily for debugging
         return res.status(500).json({
             success: false,
             message: "Database connection failed",
-            error: err.message
+            error: err.message,
+            tip: "Check MONGO_URI and IP Whitelist (0.0.0.0/0) in Atlas"
         });
     }
 });
 
-// 3. DIAGNOSTICS
+// 3. DIAGNOSTICS & VERSIONING
 app.get('/', async (req, res) => {
-    let toursCount = 0;
     try {
         const { Tour } = await import("./models/Tour.js");
-        toursCount = await Tour.countDocuments();
-    } catch (e) {
-        console.error("Diagnostic error:", e.message);
+        const count = await Tour.countDocuments();
+        res.json({
+            status: "Online",
+            version: "1.0.4",
+            database: mongoose.connection.readyState === 1 ? "Connected" : "Disconnected",
+            tours_count: count,
+            headers: req.headers
+        });
+    } catch (error) {
+        res.json({
+            status: "Online",
+            version: "1.0.4",
+            database: "Error: " + error.message
+        });
     }
-
-    res.json({
-        message: "GlobeTrails API is running",
-        version: "1.0.3",
-        db: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
-        toursInDB: toursCount,
-        originDetected: req.headers.origin || "none"
-    });
 });
 
-// 4. ROUTES
+// 4. API ROUTES
 app.use('/auth', authRoute)
 app.use('/user', userRoute)
 app.use('/tours', tourRoute)
 app.use('/bookings', bookingRoute)
 app.use('/admin', adminRoute)
 
-// 5. ERROR HANDLING
+// 5. GLOBAL ERROR HANDLER
 app.use((err, req, res, next) => {
-    console.error("APP ERROR:", err.stack);
-    res.status(err.status || 500).json({
+    console.error("SERVER CRASH:", err.stack);
+    res.status(500).json({
         success: false,
-        message: err.message || "Internal Server Error"
+        message: "Internal Server Error",
+        error: err.message
     });
 });
 
-// Initializing server
+// Start local server if not on Vercel
 if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, () => {
-        console.log(`Server is listening at port ${PORT}`);
+        console.log(`Development server running at http://localhost:${PORT}`);
     })
 }
 
