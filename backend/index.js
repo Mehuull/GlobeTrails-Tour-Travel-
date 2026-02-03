@@ -13,23 +13,18 @@ import mongoose from "mongoose";
 const app = express()
 const PORT = process.env.PORT || 3000
 
-// 1. CORS Setup (Simplified for maximum compatibility)
-const allowedOrigins = [
-    "https://globetrails.netlify.app"
-];
+// 1. ULTRA-AGGRESSIVE CORS (Highest Priority)
+app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
 
-app.use(cors({
-    origin: function (origin, callback) {
-        // If origin is in whitelist or is a netlify/vercel preview, allow it
-        if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.netlify.app') || origin.endsWith('.vercel.app')) {
-            callback(null, true);
-        } else {
-            console.log("CORS blocked origin:", origin);
-            callback(null, true); // Fallback: allow for debugging, or you can use callback(new Error('CORS'));
-        }
-    },
-    credentials: true
-}));
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
+    next();
+});
 
 app.use(express.json())
 
@@ -57,7 +52,7 @@ app.get('/', async (req, res) => {
         const count = await Tour.countDocuments();
         res.json({
             status: "Online",
-            version: "1.0.6",
+            version: "1.0.8",
             database: mongoose.connection.readyState === 1 ? "Connected" : "Disconnected",
             tours_count: count,
             headers: req.headers
