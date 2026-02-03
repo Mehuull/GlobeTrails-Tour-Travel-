@@ -35,12 +35,11 @@
   top: 5rem;
   left: -50px;
   width: 900px;
-  /* fixed size */
   height: auto;
   opacity: 0.15;
-  /* optional: to make it subtle */
   pointer-events: none;
-  /* prevents clicks on the image */
+  max-width: 100vw;
+  /* Prevent it from being wider than screen */
 }
 
 /* Left Content Section */
@@ -213,6 +212,12 @@
 
   .tour-label {
     font-size: 0.8rem;
+  }
+
+  .homepage__users-img {
+    margin: 0 auto;
+    display: block;
+    max-width: 120px;
   }
 }
 
@@ -579,25 +584,58 @@
 @media (max-width: 900px) {
   .hero-content-wrapper {
     flex-direction: column;
+    padding: 0 20px 40px 20px;
+    gap: 30px;
   }
 
-  .sub-text h3 {
-    font-size: 22px;
+  .hero-text-side {
+    text-align: center;
+  }
+
+  .hero-text-side h1 {
+    font-size: 2.2rem;
+    text-align: center;
+    margin-bottom: 15px;
+  }
+
+  .hero-desc {
+    margin-bottom: 20px;
+  }
+
+  .hero-features {
+    display: inline-block;
+    text-align: left;
+    margin-bottom: 30px;
   }
 
   .hero-image-side {
     width: 100%;
-    margin-top: 40px;
+    margin-top: 20px;
+    justify-content: center;
   }
 
-  /* Fix overflow: subtract gap from widths */
+  .tall-image {
+    height: 300px;
+    border-radius: 60px;
+  }
+
+  .wide-image {
+    height: 140px;
+  }
+
   .image-group-main,
   .image-group-sub {
     width: calc(50% - 10px);
   }
 
   .experience-badge {
-    left: 0;
+    left: -15px;
+    width: 80px;
+    height: 80px;
+  }
+
+  .experience-badge strong {
+    font-size: 1.2rem;
   }
 
   .brand-bar {
@@ -606,11 +644,28 @@
     text-align: center;
   }
 
-  /* Fix for brand logos overflowing */
   .brand-logos {
     flex-wrap: wrap;
     justify-content: center;
     gap: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-text-side h1 {
+    font-size: 1.8rem;
+  }
+
+  .tall-image {
+    height: 250px;
+  }
+
+  .wide-image {
+    height: 110px;
+  }
+
+  .image-group-sub {
+    gap: 10px;
   }
 }
 

@@ -81,3 +81,41 @@
 .searchbar-button-icon {
   font-size: 20px;
 }
+
+@media (max-width: 768px) {
+  .searchbar-container {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    padding: 1.5rem;
+  }
+
+  .searchbar-field {
+    justify-content: flex-start;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.75rem;
+  }
+
+  .searchbar-button-wrapper {
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+
+  .searchbar-button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .searchbar-wrapper {
+    margin: 20px auto;
+  }
+
+  .searchbar-icon {
+    font-size: 24px;
+  }
+
+  .searchbar-label {
+    font-size: 14px;
+  }
+}

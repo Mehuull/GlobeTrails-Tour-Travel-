@@ -76,7 +76,7 @@ const Homepage = () => {
                 </p>
               </div>
 
-              <img src={users} alt="" />
+              <img src={users} alt="Joined Users" className="homepage__users-img" />
             </div>
           </div>
 
@@ -163,7 +163,7 @@ const Homepage = () => {
                 />
                 <div className="sub-text">
                   <h3>Gateway to Unforgettable Journeys.</h3>
-                  <p>Bavro is a trusted travel agency that brings the best travel experiences to exotic destinations around the world.</p>
+                  <p>GlobeTrails is a trusted travel agency that brings the best travel experiences to exotic destinations around the world.</p>
                 </div>
               </div>
             </div>

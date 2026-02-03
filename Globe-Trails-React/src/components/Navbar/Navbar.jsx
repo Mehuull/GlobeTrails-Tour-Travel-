@@ -92,6 +92,14 @@ const Navbar = () => {
 
       {/* Mobile navigation menu */}
       <div className={`mobile-menu ${isMenuOpen ? 'active' : ''}`}>
+        <div className="mobile-menu__header">
+          <div className="mobile-menu__logo">
+            <img src={logo} alt="Logo" />
+          </div>
+          <button className="mobile-menu__close" onClick={closeMenu}>
+            <span>&times;</span>
+          </button>
+        </div>
         <ul className="mobile-menu__links">
           <li><Link to="/" onClick={closeMenu}>Home</Link></li>
           <li><Link to="/about" onClick={closeMenu}>About</Link></li>
