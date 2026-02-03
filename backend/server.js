@@ -15,7 +15,6 @@ const PORT = process.env.PORT || 3000
 
 // 1. CORS Setup (Simplified for maximum compatibility)
 const allowedOrigins = [
-    "http://localhost:5173",
     "https://globetrails.netlify.app"
 ];
 
@@ -58,7 +57,7 @@ app.get('/', async (req, res) => {
         const count = await Tour.countDocuments();
         res.json({
             status: "Online",
-            version: "1.0.4",
+            version: "1.0.6",
             database: mongoose.connection.readyState === 1 ? "Connected" : "Disconnected",
             tours_count: count,
             headers: req.headers
