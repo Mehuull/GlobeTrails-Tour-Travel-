@@ -20,20 +20,20 @@ const allowedOrigins = [
     "https://globetrails.netlify.app"
 ];
 
-app.use(cors({
-    origin: function (origin, callback) {
-        // Broaden allowed origins for debugging
-        if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.netlify.app') || origin.endsWith('.vercel.app')) {
-            callback(null, true);
-        } else {
-            console.log("CORS blocked origin:", origin);
-            callback(new Error("Not allowed by CORS"));
-        }
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-}));
+// Manual CORS middleware as a fallback
+app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    if (origin && (allowedOrigins.includes(origin) || origin.endsWith('.netlify.app') || origin.endsWith('.vercel.app'))) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+        res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    }
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(200);
+    }
+    next();
+});
 
 // Middleware to ensure DB is connected
 app.use(async (req, res, next) => {
@@ -54,8 +54,9 @@ app.use(async (req, res, next) => {
 app.get('/', (req, res) => {
     res.json({
         message: "GlobeTrails API is running",
+        version: "1.0.2",
         dbStatus: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
-        env: process.env.NODE_ENV
+        origin: req.headers.origin || "no origin"
     });
 });
 
