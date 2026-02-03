@@ -52,7 +52,7 @@ app.get('/', async (req, res) => {
         const count = await Tour.countDocuments();
         res.json({
             status: "Online",
-            version: "1.0.8",
+            version: "1.0.8-SUPERFIX-999",
             database: mongoose.connection.readyState === 1 ? "Connected" : "Disconnected",
             tours_count: count,
             headers: req.headers
