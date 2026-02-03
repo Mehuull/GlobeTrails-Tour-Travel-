@@ -1,17 +1,14 @@
 // src/components/Homepage.jsx
 import React from "react";
 import "./Homepage.css";
-import heroImage from "../../assets/hero-image.png";
-import Homegif from "../../assets/homegif.gif";
+
 import video from "../../assets/07230.mp4";
-import Lottie1 from "../../assets/lottie1.json";
-import Lottie from "lottie-react";
 import icon1 from "../../assets/icon1.jpg";
 import icon2 from "../../assets/icon2.jpg";
 import icon3 from "../../assets/icon3.jpg";
 import icon4 from "../../assets/icon4.jpg";
 import users from "../../assets/users.png";
-import bg1 from "../../assets/bg1.png";
+
 import bg0 from "../../assets/bg0.png";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import { useSelector } from "react-redux";
