@@ -24,6 +24,7 @@ app.use((req, res, next) => {
         return res.status(200).end();
     }
     next();
+
 });
 
 app.use(express.json())
