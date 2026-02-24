@@ -8,7 +8,8 @@ if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
   passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "/auth/google/callback"
+    // callbackURL: "/auth/google/callback"
+    callbackURL: process.env.BACKEND_URL ? `${process.env.BACKEND_URL}/auth/google/callback` : "/auth/google/callback"
   },
     async (accessToken, refreshToken, profile, cb) => {
       console.log(profile);
