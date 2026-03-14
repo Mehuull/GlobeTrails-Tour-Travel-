@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useLocation } from 'react-router-dom';
 import TourCard from './components/TourCard';
 import './Tours.css';
+import SearchBar from '../../components/SearchBar/SearchBar.jsx';
 
 const Tours = () => {
   const [tours, setTours] = useState([]);
@@ -32,6 +33,8 @@ const Tours = () => {
         <h1>Our Popular Tours</h1>
         <p className="subtitle">Explore the world with our curated travel packages</p>
       </div>
+
+      <SearchBar />
 
       {loading ? (
         <div className="loader-container">

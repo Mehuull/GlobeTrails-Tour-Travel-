@@ -33,7 +33,9 @@ const AdminPanel = () => {
         <div className="admin-container">
             <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
             <div className="admin-content-area">
-                {renderContent()}
+                <div key={activeTab} className="tab-transition">
+                    {renderContent()}
+                </div>
             </div>
         </div>
     );

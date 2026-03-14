@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Map, ClipboardList, Users } from 'lucide-react';
 
 const Dashboard = () => {
     const [stats, setStats] = useState({
@@ -39,15 +40,30 @@ const Dashboard = () => {
 
             <div className="dashboard-grid">
                 <div className="stat-card">
-                    <span className="stat-label">Total Tours</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <span className="stat-label">Total Tours</span>
+                        <div style={{ background: '#fff0eb', padding: '12px', borderRadius: '14px', color: 'var(--orange-color)' }}>
+                            <Map size={24} />
+                        </div>
+                    </div>
                     <span className="stat-value">{stats.tours}</span>
                 </div>
                 <div className="stat-card">
-                    <span className="stat-label">Total Bookings</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <span className="stat-label">Total Bookings</span>
+                        <div style={{ background: '#dbecfe', padding: '12px', borderRadius: '14px', color: '#3b82f6' }}>
+                            <ClipboardList size={24} />
+                        </div>
+                    </div>
                     <span className="stat-value">{stats.bookings}</span>
                 </div>
                 <div className="stat-card">
-                    <span className="stat-label">Total Users</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <span className="stat-label">Total Users</span>
+                        <div style={{ background: '#e9d5ff', padding: '12px', borderRadius: '14px', color: '#9333ea' }}>
+                            <Users size={24} />
+                        </div>
+                    </div>
                     <span className="stat-value">{stats.users}</span>
                 </div>
             </div>
@@ -69,7 +85,19 @@ const Dashboard = () => {
                         {recentBookings.length > 0 ? (
                             recentBookings.map((booking) => (
                                 <tr key={booking._id}>
-                                    <td>{booking.user?.username || booking.user?.email || 'Unknown User'}</td>
+                                    <td>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                            <div style={{
+                                                width: '32px', height: '32px', borderRadius: '50%',
+                                                backgroundColor: 'var(--orange-color)', color: 'white',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                fontWeight: 'bold', fontSize: '14px', textTransform: 'uppercase'
+                                            }}>
+                                                {(booking.user?.username || booking.user?.email || 'U').charAt(0)}
+                                            </div>
+                                            <span>{booking.user?.username || booking.user?.email || 'Unknown User'}</span>
+                                        </div>
+                                    </td>
                                     <td>
                                         {typeof booking.tour === 'object' && booking.tour !== null
                                             ? booking.tour.title

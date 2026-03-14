@@ -590,16 +590,19 @@
 
   .hero-text-side {
     text-align: center;
+    text-align: start;
   }
 
   .hero-text-side h1 {
     font-size: 2.2rem;
     text-align: center;
     margin-bottom: 15px;
+    text-align: start;
   }
 
   .hero-desc {
     margin-bottom: 20px;
+    text-align: start;
   }
 
   .hero-features {
@@ -654,6 +657,7 @@
 @media (max-width: 480px) {
   .hero-text-side h1 {
     font-size: 1.8rem;
+    text-align: start;
   }
 
   .tall-image {

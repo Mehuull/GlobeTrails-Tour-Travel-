@@ -72,8 +72,20 @@ const BookingList = () => {
                         {bookings.map((booking) => (
                             <tr key={booking._id}>
                                 <td>
-                                    <div style={{ fontWeight: 'bold' }}>{booking.user?.username || "Unknown"}</div>
-                                    <div style={{ fontSize: '12px', color: '#777' }}>{booking.user?.email}</div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <div style={{
+                                            width: '32px', height: '32px', borderRadius: '50%',
+                                            backgroundColor: 'var(--orange-color)', color: 'white',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            fontWeight: 'bold', fontSize: '14px', textTransform: 'uppercase'
+                                        }}>
+                                            {(booking.user?.username || booking.user?.email || 'U').charAt(0)}
+                                        </div>
+                                        <div>
+                                            <div style={{ fontWeight: 'bold' }}>{booking.user?.username || "Unknown"}</div>
+                                            <div style={{ fontSize: '12px', color: '#777' }}>{booking.user?.email}</div>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td>{booking.tour?.title || "Deleted Tour"}</td>
                                 <td>{new Date(booking.preferredStartDate).toLocaleDateString()}</td>

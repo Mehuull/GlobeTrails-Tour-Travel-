@@ -58,16 +58,42 @@
 // };
 
 // export default SearchBar;
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { RiMapPinLine, RiGroupLine, RiSearchLine, RiSuitcaseLine } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
 import "./SearchBar.css";
+
+const CATEGORIES_OPTIONS = [
+  "Adventure Tour",
+  "Wildlife Tour",
+  "Beach Tour",
+  "Heritage Tour",
+  "Hill Station Tour",
+  "Pilgrimage Tour",
+  "Honeymoon Tour",
+  "Family Tours",
+  "Eco / Nature Tour"
+];
 
 const SearchBar = () => {
   const [location, setLocation] = useState("");
   const [category, setCategory] = useState("");
   const [maxPeople, setMaxPeople] = useState("");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const handleSearch = () => {
     if (!location && !category && !maxPeople) {
@@ -102,18 +128,40 @@ const SearchBar = () => {
           </div>
         </div>
 
-        {/* Category */}
+        {/* Category Custom Dropdown */}
         <div className="searchbar-field">
           <RiSuitcaseLine className="searchbar-icon" />
-          <div>
+          <div style={{ width: '100%', maxWidth: '180px', position: 'relative' }} ref={dropdownRef}>
             <label className="searchbar-label">Tour Category</label>
-            <input
-              type="text"
-              placeholder="e.g. Adventure, Beach"
-              className="searchbar-input"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-            />
+            <div className={`searchbar-custom-dropdown ${isDropdownOpen ? 'open' : ''}`}>
+              <div 
+                className={`searchbar-dropdown-selected ${!category ? 'is-placeholder' : ''}`}
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              >
+                {category || "Select Category"}
+                <span className={`dropdown-arrow ${isDropdownOpen ? 'open' : ''}`}></span>
+              </div>
+              
+              {isDropdownOpen && (
+                <div className="searchbar-dropdown-menu">
+                  <div 
+                    className={`searchbar-dropdown-item ${!category ? 'active' : ''}`}
+                    onClick={() => { setCategory(""); setIsDropdownOpen(false); }}
+                  >
+                    Select Category
+                  </div>
+                  {CATEGORIES_OPTIONS.map((cat, index) => (
+                    <div 
+                      key={index}
+                      className={`searchbar-dropdown-item ${category === cat ? 'active' : ''}`}
+                      onClick={() => { setCategory(cat); setIsDropdownOpen(false); }}
+                    >
+                      {cat}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

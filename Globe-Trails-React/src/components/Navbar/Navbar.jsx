@@ -5,7 +5,7 @@ import logo from '../../assets/GlobeTrails-logo.png';
 import { Link } from 'react-router-dom';
 // import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { BookA, LogOut, User } from 'lucide-react'
+import { LogOut, User, LayoutDashboard } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -59,7 +59,6 @@ const Navbar = () => {
         <li><Link to="/" onClick={closeMenu}>Home</Link></li>
         <li><Link to="/about" onClick={closeMenu}>About</Link></li>
         <li><Link to="/tours" onClick={closeMenu}>Tours & Packages</Link></li>
-        <li><Link to="/feedback" onClick={closeMenu}>Feedback</Link></li>
       </ul>
 
       {/* Desktop auth buttons */}
@@ -75,8 +74,16 @@ const Navbar = () => {
             <DropdownMenuContent>
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate('/profile')} style={{ cursor: 'pointer' }}><User size={16} style={{ marginRight: '8px' }} />Profile</DropdownMenuItem>
-              <DropdownMenuItem style={{ cursor: 'pointer' }}><BookA size={16} style={{ marginRight: '8px' }} />Notes</DropdownMenuItem>
+              {user.username === "Admin" ? (
+                <DropdownMenuItem onClick={() => navigate('/adminpanel')} style={{ cursor: 'pointer' }}>
+                  <LayoutDashboard size={16} style={{ marginRight: '8px' }} />Admin Panel
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem onClick={() => navigate('/profile')} style={{ cursor: 'pointer' }}>
+                  <User size={16} style={{ marginRight: '8px' }} />Profile
+                </DropdownMenuItem>
+              )}
+
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={logoutHandler} style={{ cursor: 'pointer', color: 'red' }} ><LogOut size={16} style={{ marginRight: '8px' }} />Logout</DropdownMenuItem>
             </DropdownMenuContent>
@@ -104,7 +111,6 @@ const Navbar = () => {
           <li><Link to="/" onClick={closeMenu}>Home</Link></li>
           <li><Link to="/about" onClick={closeMenu}>About</Link></li>
           <li><Link to="/tours" onClick={closeMenu}>Tours & Packages</Link></li>
-          <li><Link to="/feedback" onClick={closeMenu}>Feedback</Link></li>
         </ul>
 
         <div className="mobile-menu__auth">
@@ -115,7 +121,11 @@ const Navbar = () => {
                   <AvatarImage src={user?.avatar} />
                   <AvatarFallback>{user?.username?.[0]?.toUpperCase() || 'U'}</AvatarFallback>
                 </Avatar>
-                <Link to="/profile" onClick={closeMenu}>Profile</Link>
+                {user.username === "Admin" ? (
+                  <Link to="/adminpanel" onClick={closeMenu}>Admin Panel</Link>
+                ) : (
+                  <Link to="/profile" onClick={closeMenu}>Profile</Link>
+                )}
                 <button onClick={() => { logoutHandler(); closeMenu(); }} style={{ color: 'red', border: 'none', background: 'none' }}>Logout</button>
               </div>
             ) : (

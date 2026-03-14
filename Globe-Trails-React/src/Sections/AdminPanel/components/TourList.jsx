@@ -51,6 +51,7 @@ const TourList = ({ setActiveTab, setEditingTour }) => {
                 <table className="admin-table">
                     <thead>
                         <tr>
+                            <th>No.</th>
                             <th>Image</th>
                             <th>Title</th>
                             <th>Category</th>
@@ -61,8 +62,11 @@ const TourList = ({ setActiveTab, setEditingTour }) => {
                         </tr>
                     </thead>
                     <tbody>
-                        {tours.map((tour) => (
+                        {tours.map((tour, index) => (
                             <tr key={tour._id}>
+                                <td style={{ fontWeight: 'bold', color: 'var(--admin-text)' }}>
+                                    {index + 1}
+                                </td>
                                 <td>
                                     <img
                                         src={tour.images?.[0] || "https://via.placeholder.com/50"}
@@ -106,7 +110,7 @@ const TourList = ({ setActiveTab, setEditingTour }) => {
                         ))}
                         {tours.length === 0 && (
                             <tr>
-                                <td colSpan="7" style={{ textAlign: 'center', padding: '30px' }}>No tours found.</td>
+                                <td colSpan="8" style={{ textAlign: 'center', padding: '30px' }}>No tours found.</td>
                             </tr>
                         )}
                     </tbody>

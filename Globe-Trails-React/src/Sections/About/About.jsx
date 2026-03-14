@@ -1,5 +1,8 @@
 import React, { useEffect } from 'react';
 import './About.css';
+import aboutIcon1 from '../../assets/about-1.svg';
+import aboutIcon2 from '../../assets/about-2.svg';
+import aboutIcon3 from '../../assets/about-3.svg';
 
 const About = () => {
   useEffect(() => {
@@ -73,17 +76,23 @@ const About = () => {
         <h2 className="f-section-title">Our Core Values</h2>
         <div className="values-grid">
           <div className="value-card">
-            <div className="value-icon">🌍</div>
+            <div className="value-icon">
+              <img src={aboutIcon1} alt="Expert Guidance" />
+            </div>
             <h3>Expert Guidance</h3>
             <p>Local insights and professional guides to show you the heart of every location.</p>
           </div>
           <div className="value-card">
-            <div className="value-icon">🔒</div>
+            <div className="value-icon">
+              <img src={aboutIcon2} alt="Safety First" />
+            </div>
             <h3>Safety First</h3>
             <p>Your well-being is our priority. We monitor all destinations for a worry-free trip.</p>
           </div>
           <div className="value-card">
-            <div className="value-icon">✨</div>
+            <div className="value-icon">
+              <img src={aboutIcon3} alt="Unique Experiences" />
+            </div>
             <h3>Unique Experiences</h3>
             <p>Go beyond the tourist trails with off-beat destinations and authentic cultural stays.</p>
           </div>
