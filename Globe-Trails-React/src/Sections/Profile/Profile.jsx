@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { getData } from '@/context/userContext';
 import { toast } from 'sonner';
-import { User, Calendar, MapPin, Users, IndianRupee, Trash2, Clock } from 'lucide-react';
+import { User, Calendar, MapPin, Users, IndianRupee, Trash2, Clock, CreditCard, ShieldAlert } from 'lucide-react';
 import './Profile.css';
 
 const Profile = () => {
@@ -12,16 +12,14 @@ const Profile = () => {
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
-    const isCancellable = (startDate) => {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        const tourDate = new Date(startDate);
-        tourDate.setHours(0, 0, 0, 0);
-
-        const diffInTime = tourDate.getTime() - today.getTime();
-        const diffInDays = Math.round(diffInTime / (1000 * 3600 * 24));
-        return diffInDays >= 20;
+    const loadRazorpayScript = () => {
+        return new Promise((resolve) => {
+            const script = document.createElement("script");
+            script.src = "https://checkout.razorpay.com/v1/checkout.js";
+            script.onload = () => resolve(true);
+            script.onerror = () => resolve(false);
+            document.body.appendChild(script);
+        });
     };
 
     useEffect(() => {
@@ -64,11 +62,69 @@ const Profile = () => {
             });
 
             if (res.data.success) {
-                toast.success("Booking cancelled successfully");
-                setBookings(prev => prev.filter(b => b._id !== bookingId));
+                toast.success(res.data.message || "Booking cancelled successfully");
+                // Refresh bookings instead of just filtering to show the "cancelled" status and refund details
+                setBookings(prev => prev.map(b => b._id === bookingId ? { ...b, inquiryStatus: "cancelled" } : b));
             }
         } catch (error) {
             toast.error(error.response?.data?.message || "Failed to cancel booking");
+        }
+    };
+
+    const handlePayRemaining = async (bookingId) => {
+        const resScript = await loadRazorpayScript();
+        if (!resScript) {
+            toast.error("Razorpay SDK failed to load. Are you online?");
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('accessToken');
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/bookings/create-full-payment`, { bookingId }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (res.data.success) {
+                const { razorpayOrder } = res.data;
+                const options = {
+                    key: import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_dummy",
+                    amount: razorpayOrder.amount,
+                    currency: "INR",
+                    name: "GlobeTrails - Remaining Payment",
+                    description: "Full Payment for Tour Booking",
+                    order_id: razorpayOrder.id,
+                    handler: async function (response) {
+                        try {
+                            const verifyRes = await axios.post(`${import.meta.env.VITE_API_URL}/bookings/verify-full-payment`, {
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature,
+                                bookingId: bookingId
+                            }, {
+                                headers: { Authorization: `Bearer ${token}` }
+                            });
+                            
+                            if (verifyRes.data.success) {
+                                toast.success("Full payment successful!");
+                                setBookings(prev => prev.map(b => b._id === bookingId ? { ...b, paymentStatus: "full_paid" } : b));
+                            }
+                        } catch (err) {
+                            toast.error("Payment verification failed.");
+                            console.error(err);
+                        }
+                    },
+                    prefill: {
+                        name: user.username,
+                        email: user.email
+                    },
+                    theme: { color: "#2ecc71" }
+                };
+
+                const paymentObject = new window.Razorpay(options);
+                paymentObject.open();
+            }
+        } catch (error) {
+             toast.error(error.response?.data?.message || "Failed to initiate payment");
         }
     };
 
@@ -92,6 +148,9 @@ const Profile = () => {
                             <h1>{user?.username}</h1>
                             <p className="user-email">{user?.email}</p>
                             <span className="user-badge">{user?.role || 'Traveler'}</span>
+                            <div className="policy-link-highlight">
+                                <Link to="/policy" className="btn-policy"><ShieldAlert size={16} /> View Policies & Terms</Link>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -142,7 +201,17 @@ const Profile = () => {
                                             >
                                                 View Tour
                                             </button>
-                                            {isCancellable(booking.preferredStartDate) && (
+                                            
+                                            {booking.inquiryStatus !== "cancelled" && booking.paymentStatus === "deposit_paid" && (
+                                                <button
+                                                    className="btn-pay-remaining"
+                                                    onClick={() => handlePayRemaining(booking._id)}
+                                                >
+                                                    <CreditCard size={16} /> Pay {booking.balanceAmount ? `₹${booking.balanceAmount}` : 'Balance'}
+                                                </button>
+                                            )}
+
+                                            {booking.inquiryStatus !== "cancelled" && (
                                                 <button
                                                     className="btn-cancel-booking"
                                                     onClick={() => handleCancelBooking(booking._id)}

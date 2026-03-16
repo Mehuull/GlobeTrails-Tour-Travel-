@@ -77,21 +77,23 @@ export const sendBookingInquiryEmail = async (booking, tourTitle, userEmail, use
 };
 
 export const sendBookingConfirmationEmail = async (booking, tourTitle, userEmail, userName) => {
+    const balanceMsg = booking.balanceAmount ? `<p style="color: #d35400;"><strong>Reminder:</strong> A remaining balance of <strong>₹${booking.balanceAmount}</strong> is due at least 5 days before your trip. Please log in to your profile to complete the payment.</p>` : '';
+
     const mailOptions = {
         from: `"GlobeTrails" <${process.env.MAIL_USER}>`,
         to: userEmail,
-        subject: `Booking CONFIRMED: ${tourTitle}`,
+        subject: `Booking CONFIRMED (Deposit Paid): ${tourTitle}`,
         html: `
         <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;">
             <div style="text-align: center; margin-bottom: 20px;">
                 <h1 style="color: #27ae60; margin: 0;">GlobeTrails</h1>
-                <p style="color: #666; font-size: 14px;">Adventure Confirmed!</p>
+                <p style="color: #666; font-size: 14px;">Deposit Received & Booking Confirmed!</p>
             </div>
             
             <div style="background-color: #f0fff4; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #c6f6d5;">
                 <h2 style="color: #27ae60; margin-top: 0;">Great News, ${userName}!</h2>
                 <p style="color: #2f855a; line-height: 1.6;">
-                    Your booking for <strong>${tourTitle}</strong> has been <strong>OFFICIALLY CONFIRMED</strong>. We are excited to have you with us!
+                    Your advanced deposit for <strong>${tourTitle}</strong> has been received and your booking is <strong>CONFIRMED</strong>. 
                 </p>
             </div>
 
@@ -111,19 +113,24 @@ export const sendBookingConfirmationEmail = async (booking, tourTitle, userEmail
                         <td style="padding: 8px 0; color: #2c3e50; font-weight: 600;">${booking.guests} Persons</td>
                     </tr>
                     <tr>
-                        <td style="padding: 8px 0; color: #7f8c8d;">Total Paid:</td>
+                        <td style="padding: 8px 0; color: #7f8c8d;">Total Price:</td>
                         <td style="padding: 8px 0; color: #2c3e50; font-weight: 600;">₹${booking.finalPrice}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0; color: #7f8c8d;">Deposit Paid:</td>
+                        <td style="padding: 8px 0; color: #27ae60; font-weight: 600;">₹${booking.depositAmount || Math.round(booking.finalPrice * 0.4)}</td>
                     </tr>
                 </table>
             </div>
 
+            ${balanceMsg}
+
             <p style="color: #555; line-height: 1.6;">
-                Please keep this email for your records. You can also view your booking details and manage your trip in your profile section on our website.
+                You can view your booking details and our cancellation policy in your profile section on our website.
             </p>
 
             <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; color: #999; font-size: 12px;">
                 <p>&copy; 2026 GlobeTrails Travel Agency. All rights reserved.</p>
-                <p>Pack your bags, adventure awaits!</p>
             </div>
         </div>
         `
@@ -131,8 +138,43 @@ export const sendBookingConfirmationEmail = async (booking, tourTitle, userEmail
 
     try {
         await transporter.sendMail(mailOptions);
-        console.log(`Booking confirmation email sent to ${userEmail}`);
+        console.log(`Booking deposit confirmation email sent to ${userEmail}`);
     } catch (error) {
         console.error("Error sending confirmation email:", error);
+    }
+};
+
+export const sendFullPaymentConfirmationEmail = async (booking, tourTitle, userEmail, userName) => {
+    const mailOptions = {
+        from: `"GlobeTrails" <${process.env.MAIL_USER}>`,
+        to: userEmail,
+        subject: `Full Payment Received: ${tourTitle}`,
+        html: `
+        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h1 style="color: #2ecc71; margin: 0;">GlobeTrails</h1>
+                <p style="color: #666; font-size: 14px;">Full Payment Successful!</p>
+            </div>
+            
+            <div style="background-color: #f0fff4; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                <h2 style="color: #27ae60; margin-top: 0;">Thank you, ${userName}!</h2>
+                <p style="color: #2f855a; line-height: 1.6;">
+                    We have received your full payment of <strong>₹${booking.finalPrice}</strong> for <strong>${tourTitle}</strong>. You are all set for your trip!
+                </p>
+                <p style="color: #555;">Get ready for an amazing adventure starting on ${new Date(booking.preferredStartDate).toLocaleDateString()}.</p>
+            </div>
+
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; color: #999; font-size: 12px;">
+                <p>&copy; 2026 GlobeTrails Travel Agency. All rights reserved.</p>
+            </div>
+        </div>
+        `
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log(`Full payment confirmation email sent to ${userEmail}`);
+    } catch (error) {
+        console.error("Error sending full payment email:", error);
     }
 };

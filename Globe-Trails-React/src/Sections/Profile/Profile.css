@@ -239,3 +239,47 @@
         padding: 20px;
     }
 }
+
+.policy-link-highlight {
+    margin-top: 15px;
+}
+
+.btn-policy {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    background-color: #fce4ec;
+    color: #d81b60;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.btn-policy:hover {
+    background-color: #f8bbd0;
+    color: #c2185b;
+}
+
+.btn-pay-remaining {
+    flex: 1.5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 8px;
+    border-radius: 10px;
+    border: 1px solid #d4edda;
+    background: #e8f5e9;
+    color: #27ae60;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-pay-remaining:hover {
+    background: #c8e6c9;
+}

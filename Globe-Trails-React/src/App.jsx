@@ -15,6 +15,7 @@ import { AuthSuccess, ChangePassword, ForgotPassword, Verify, VerifyEmail, Verif
 import AdminPanel from "./Sections/AdminPanel/AdminPanel.jsx";
 import Profile from "./Sections/Profile/Profile.jsx";
 import Footer from "./components/Footer/Footer.jsx";
+import Policy from "./pages/Policy.jsx";
 import { Toaster } from 'sonner';
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
       <Toaster position="top-center" richColors />
       <Navbar />
       <Routes>
+        <Route path="/policy" element={<Policy />} />
         <Route path="/" element={<HomePage />} />
         <Route path="/about" element={<About />} />
         <Route path="/tours" element={<Tours />} />

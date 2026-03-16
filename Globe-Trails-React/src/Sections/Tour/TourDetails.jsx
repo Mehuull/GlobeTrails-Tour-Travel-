@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { Clock, Users, MapPin, CheckCircle, XCircle, ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import { getData } from '@/context/userContext';
@@ -78,12 +78,32 @@ const TourDetails = () => {
         setBookingData((prev) => ({ ...prev, [e.target.id]: e.target.value }));
     };
 
+    const loadRazorpayScript = () => {
+        return new Promise((resolve) => {
+            const script = document.createElement("script");
+            script.src = "https://checkout.razorpay.com/v1/checkout.js";
+            script.onload = () => {
+                resolve(true);
+            };
+            script.onerror = () => {
+                resolve(false);
+            };
+            document.body.appendChild(script);
+        });
+    };
+
     const handleBookingSchema = async (e) => {
         e.preventDefault();
 
         if (!user) {
             toast.error("Please sign in to book a tour");
             navigate('/signin'); // Or wherever your login is
+            return;
+        }
+
+        const resScript = await loadRazorpayScript();
+        if (!resScript) {
+            toast.error("Razorpay SDK failed to load. Are you online?");
             return;
         }
 
@@ -100,15 +120,55 @@ const TourDetails = () => {
             };
 
             const tokens = localStorage.getItem('accessToken'); // Retrieve token for auth
-            const res = await axios.post(`${import.meta.env.VITE_API_URL}/bookings`, payload, {
+            const response = await axios.post(`${import.meta.env.VITE_API_URL}/bookings`, payload, {
                 headers: {
                     Authorization: `Bearer ${tokens}`
                 }
             });
 
-            if (res.data.success) {
-                toast.success("Booking inquiry sent successfully!");
-                navigate('/profile');
+            if (response.data.success) {
+                const { razorpayOrder, data: newBookingData } = response.data;
+                
+                const options = {
+                    key: import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_dummy", // Enter the Key ID generated from the Dashboard
+                    amount: razorpayOrder.amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+                    currency: "INR",
+                    name: "GlobeTrails",
+                    description: "Advanced Deposit for Tour Booking",
+                    order_id: razorpayOrder.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+                    handler: async function (responseFromRazorpay) {
+                        try {
+                            const verifyRes = await axios.post(`${import.meta.env.VITE_API_URL}/bookings/verify-payment`, {
+                                razorpay_order_id: responseFromRazorpay.razorpay_order_id,
+                                razorpay_payment_id: responseFromRazorpay.razorpay_payment_id,
+                                razorpay_signature: responseFromRazorpay.razorpay_signature,
+                                bookingId: newBookingData._id
+                            }, {
+                                headers: { Authorization: `Bearer ${tokens}` }
+                            });
+                            
+                            if (verifyRes.data.success) {
+                                toast.success("Payment successful! Booking confirmed.");
+                                navigate('/policy'); // Force navigate to policy
+                            }
+                        } catch (err) {
+                            toast.error("Payment verification failed. Please contact support.");
+                            console.error(err);
+                        }
+                    },
+                    prefill: {
+                        name: user.username,
+                        email: user.email,
+                        contact: bookingData.phone
+                    },
+                    theme: {
+                        color: "#f39c12"
+                    }
+                };
+
+                const paymentObject = new window.Razorpay(options);
+                paymentObject.open();
+                
             }
         } catch (error) {
             console.error(error);
@@ -120,6 +180,15 @@ const TourDetails = () => {
     if (!tour) return <div className="not-found">Tour not found</div>;
 
     const totalAmount = Number(tour.pricePerPerson) * Number(bookingData.guest) + serviceCharge;
+
+    const getTodayDate = () => {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+    const minDateAvailable = getTodayDate();
 
     return (
         <div className="tour-details-page">
@@ -237,17 +306,26 @@ const TourDetails = () => {
                         ) : (
                             <form className="booking-form" onSubmit={handleBookingSchema}>
                                 <div className="form-group-details">
+                                    <label htmlFor="fullName">Full Name</label>
                                     <input type="text" placeholder="Full Name" id="fullName" required onChange={handleChange} value={bookingData.fullName} />
                                 </div>
                                 <div className="form-group-details">
+                                    <label htmlFor="email">Email Address</label>
                                     <input type="email" placeholder="Email" id="email" required onChange={handleChange} value={bookingData.email} />
                                 </div>
                                 <div className="form-group-details">
+                                    <label htmlFor="phone">Phone Number</label>
                                     <input type="tel" placeholder="Phone" id="phone" required onChange={handleChange} value={bookingData.phone} />
                                 </div>
                                 <div className="form-row-details">
-                                    <input type="date" id="bookAt" required onChange={handleChange} value={bookingData.bookAt} className="date-input" />
-                                    <input type="number" placeholder="Guest" id="guest" required min="1" max={tour.maxGroupSize} onChange={handleChange} value={bookingData.guest} />
+                                    <div className="input-wrapper">
+                                        <label htmlFor="bookAt">Date</label>
+                                        <input type="date" id="bookAt" required min={minDateAvailable} onChange={handleChange} value={bookingData.bookAt} className="date-input" />
+                                    </div>
+                                    <div className="input-wrapper">
+                                        <label htmlFor="guest">Guests</label>
+                                        <input type="number" placeholder="Guest" id="guest" required min="1" max={tour.maxGroupSize} onChange={handleChange} value={bookingData.guest} />
+                                    </div>
                                 </div>
 
                                 <div className="price-summary">
@@ -270,7 +348,7 @@ const TourDetails = () => {
                         )}
                         <div className="cancellation-policy-note">
                             <Clock size={14} className="inline-icon" />
-                            <span>* Cancellation is only allowed 20 days prior to the travel date.</span>
+                            <span>* By booking, you agree to our <Link to="/policy" className="text-blue-500 font-bold underline">Policies & Terms</Link>.</span>
                         </div>
                     </div>
                 </div>

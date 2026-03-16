@@ -251,6 +251,15 @@
     margin-bottom: 15px;
 }
 
+.form-group-details label {
+    display: block;
+    margin-bottom: 6px;
+    margin-left: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #555;
+}
+
 .form-group-details input {
     width: 100%;
     padding: 12px 15px;
@@ -268,8 +277,22 @@
 
 .form-row-details {
     display: flex;
-    gap: 10px;
+    gap: 15px;
     margin-bottom: 15px;
+}
+
+.form-row-details .input-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-row-details label {
+    margin-bottom: 6px;
+    margin-left: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #555;
 }
 
 .form-row-details input {
@@ -389,6 +412,11 @@
         order: -1;
         /* Show booking form earlier on mobile? Or maybe keeping it below is better. Let's keep specific order standard */
         order: 1;
+    }
+
+    .inc-exc-grid {
+        display: grid;
+        grid-template-columns: 1fr;
     }
 
     .details-image-container {

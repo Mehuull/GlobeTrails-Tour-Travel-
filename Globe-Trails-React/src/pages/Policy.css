@@ -1,0 +1,80 @@
+.policy-page {
+    padding: 60px 20px;
+    background-color: #f9f9f9;
+    min-height: 100vh;
+}
+
+.policy-container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.policy-title {
+    text-align: center;
+    font-size: 2.5rem;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.policy-intro {
+    text-align: center;
+    color: #666;
+    margin-bottom: 40px;
+    font-size: 1.1rem;
+}
+
+.policy-section {
+    margin-bottom: 35px;
+}
+
+.policy-section h2 {
+    color: #2c3e50;
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+
+.policy-section p, .policy-section li {
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: #555;
+}
+
+.policy-section ul {
+    list-style-type: disc;
+    padding-left: 20px;
+}
+
+.policy-section li {
+    margin-bottom: 8px;
+}
+
+.refund-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+.refund-table th, .refund-table td {
+    border: 1px solid #ddd;
+    padding: 12px 15px;
+    text-align: left;
+}
+
+.refund-table th {
+    background-color: #f4f6f8;
+    color: #333;
+    font-weight: 600;
+}
+
+.note {
+    font-style: italic;
+    font-size: 0.95rem;
+    color: #888;
+}
