@@ -184,6 +184,15 @@ export const verifyFullPayment = async (req, res) => {
 // Get user's bookings
 export const getUserBookings = async (req, res) => {
     try {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // Delete past bookings automatically to clear from DB and 'My Bookings'
+        await Booking.deleteMany({
+            user: req.userId,
+            preferredStartDate: { $lt: today }
+        });
+
         const bookings = await Booking.find({ user: req.userId })
             .populate("tour", "title images pricePerPerson duration")
             .sort({ createdAt: -1 });
@@ -196,6 +205,14 @@ export const getUserBookings = async (req, res) => {
 // Get all bookings (Admin)
 export const getAllBookings = async (req, res) => {
     try {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // Clean up all past bookings globally
+        await Booking.deleteMany({
+            preferredStartDate: { $lt: today }
+        });
+
         const bookings = await Booking.find()
             .populate("user", "username email")
             .populate("tour", "title pricePerPerson")
