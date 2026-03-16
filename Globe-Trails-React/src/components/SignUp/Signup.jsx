@@ -98,7 +98,7 @@ const Signup = () => {
         {/* Left Panel */}
         <div className="auth-left">
           <div className="auth-content">
-            <div className="logo">voyger</div>
+            <div className="logo">GlobeTrails</div>
             <h1 className="auth-heading">Join the <br /> Adventure</h1>
 
             {/* <button className="google-wide-btn" onClick={() => window.open(`${import.meta.env.VITE_API_URL}/auth/google`, "_self")}>
