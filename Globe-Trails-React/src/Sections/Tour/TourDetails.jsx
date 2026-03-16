@@ -154,6 +154,21 @@ const TourDetails = () => {
                         } catch (err) {
                             toast.error("Payment verification failed. Please contact support.");
                             console.error(err);
+                            try {
+                                await axios.delete(`${import.meta.env.VITE_API_URL}/bookings/${newBookingData._id}`, { headers: { Authorization: `Bearer ${tokens}` } });
+                            } catch (e) {}
+                        }
+                    },
+                    modal: {
+                        ondismiss: async function() {
+                            try {
+                                await axios.delete(`${import.meta.env.VITE_API_URL}/bookings/${newBookingData._id}`, {
+                                    headers: { Authorization: `Bearer ${tokens}` }
+                                });
+                                toast.error("Payment cancelled. Booking was not completed.");
+                            } catch (e) {
+                                console.error("Cleanup failed", e);
+                            }
                         }
                     },
                     prefill: {
@@ -167,6 +182,16 @@ const TourDetails = () => {
                 };
 
                 const paymentObject = new window.Razorpay(options);
+
+                paymentObject.on('payment.failed', async function (response) {
+                     toast.error("Payment failed. Booking not complete.");
+                     try {
+                          await axios.delete(`${import.meta.env.VITE_API_URL}/bookings/${newBookingData._id}`, {
+                              headers: { Authorization: `Bearer ${tokens}` }
+                          });
+                     } catch (e) {}
+                });
+
                 paymentObject.open();
                 
             }
