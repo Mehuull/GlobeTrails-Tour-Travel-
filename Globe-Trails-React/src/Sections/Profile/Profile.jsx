@@ -87,7 +87,7 @@ const Profile = () => {
             if (res.data.success) {
                 const { razorpayOrder } = res.data;
                 const options = {
-                    key: import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_dummy",
+                    key: import.meta.env.VITE_RAZORPAY_KEY_ID,
                     amount: razorpayOrder.amount,
                     currency: "INR",
                     name: "GlobeTrails - Remaining Payment",
@@ -103,7 +103,7 @@ const Profile = () => {
                             }, {
                                 headers: { Authorization: `Bearer ${token}` }
                             });
-                            
+
                             if (verifyRes.data.success) {
                                 toast.success("Full payment successful!");
                                 setBookings(prev => prev.map(b => b._id === bookingId ? { ...b, paymentStatus: "full_paid" } : b));
@@ -124,7 +124,7 @@ const Profile = () => {
                 paymentObject.open();
             }
         } catch (error) {
-             toast.error(error.response?.data?.message || "Failed to initiate payment");
+            toast.error(error.response?.data?.message || "Failed to initiate payment");
         }
     };
 
@@ -172,7 +172,9 @@ const Profile = () => {
                                     <div className="booking-image">
                                         <img src={booking.tour?.images?.[0]} alt={booking.tour?.title} />
                                         <div className={`status-badge ${booking.inquiryStatus}`}>
-                                            {booking.inquiryStatus}
+                                            {booking.inquiryStatus === 'pending' && booking.paymentStatus === 'deposit_paid'
+                                                ? 'Awaiting Confirmation'
+                                                : booking.inquiryStatus}
                                         </div>
                                     </div>
 
@@ -194,6 +196,29 @@ const Profile = () => {
                                             <span className="total-price">₹{booking.finalPrice}</span>
                                         </div>
 
+                                        <div className="booking-info-row">
+                                            <CreditCard size={16} />
+                                            <span style={{
+                                                color: booking.paymentStatus === 'deposit_paid' ? '#f39c12'
+                                                    : booking.paymentStatus === 'full_paid' ? '#27ae60'
+                                                    : booking.paymentStatus === 'refunded' ? '#e74c3c'
+                                                    : '#999',
+                                                fontWeight: 600
+                                            }}>
+                                                {booking.paymentStatus === 'deposit_paid' ? `Deposit Paid (₹${booking.depositAmount})`
+                                                    : booking.paymentStatus === 'full_paid' ? 'Fully Paid'
+                                                    : booking.paymentStatus === 'refunded' ? `Refunded ₹${booking.cancellationRefundAmount}`
+                                                    : 'Payment Pending'}
+                                            </span>
+                                        </div>
+
+                                        {booking.inquiryStatus === 'rejected' && (
+                                            <div className="booking-info-row" style={{ color: '#e74c3c', fontWeight: 600 }}>
+                                                <ShieldAlert size={16} />
+                                                <span>Booking Rejected — Refund: ₹{booking.cancellationRefundAmount || 0}</span>
+                                            </div>
+                                        )}
+
                                         <div className="booking-actions">
                                             <button
                                                 className="btn-view-tour"
@@ -201,8 +226,8 @@ const Profile = () => {
                                             >
                                                 View Tour
                                             </button>
-                                            
-                                            {booking.inquiryStatus !== "cancelled" && booking.paymentStatus === "deposit_paid" && (
+
+                                            {booking.inquiryStatus === "confirmed" && booking.paymentStatus === "deposit_paid" && (
                                                 <button
                                                     className="btn-pay-remaining"
                                                     onClick={() => handlePayRemaining(booking._id)}
@@ -211,7 +236,7 @@ const Profile = () => {
                                                 </button>
                                             )}
 
-                                            {booking.inquiryStatus !== "cancelled" && (
+                                            {booking.inquiryStatus !== "cancelled" && booking.inquiryStatus !== "rejected" && (
                                                 <button
                                                     className="btn-cancel-booking"
                                                     onClick={() => handleCancelBooking(booking._id)}

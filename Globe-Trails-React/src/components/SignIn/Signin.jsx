@@ -343,7 +343,7 @@ const Signin = () => {
         {/* Left Panel */}
         <div className="auth-left">
           <div className="auth-content">
-            <div className="logo">voyger</div>
+            <div className="logo">GlobeTrails</div>
             <h1 className="auth-heading">Start your <br /> perfect trip</h1>
 
             {/* New Standard Google Button */}

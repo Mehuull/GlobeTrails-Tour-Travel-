@@ -107,18 +107,18 @@ const TourDetails = () => {
             return;
         }
 
-        try {
-            const payload = {
-                tour: tour._id,
-                preferredStartDate: bookingData.bookAt,
-                guests: Number(bookingData.guest),
-                contactDetails: {
-                    phone: bookingData.phone,
-                    email: bookingData.email
-                },
-                finalPrice: (Number(tour.pricePerPerson) * Number(bookingData.guest)) + serviceCharge
-            };
+        const payload = {
+            tour: tour._id,
+            preferredStartDate: bookingData.bookAt,
+            guests: Number(bookingData.guest),
+            contactDetails: {
+                phone: bookingData.phone,
+                email: bookingData.email
+            },
+            finalPrice: totalAmount
+        };
 
+        try {
             const tokens = localStorage.getItem('accessToken'); // Retrieve token for auth
             const response = await axios.post(`${import.meta.env.VITE_API_URL}/bookings`, payload, {
                 headers: {
@@ -128,14 +128,26 @@ const TourDetails = () => {
 
             if (response.data.success) {
                 const { razorpayOrder, data: newBookingData } = response.data;
-                
+
+                console.log("FULL RESPONSE:", response.data);
+                console.log("RAZORPAY ORDER:", razorpayOrder);
+                console.log("ORDER ID:", razorpayOrder?.id);
+                console.log("FRONTEND KEY:", import.meta.env.VITE_RAZORPAY_KEY_ID);
+                console.log("ORDER AMOUNT:", razorpayOrder.amount);
+                console.log("ORDER AMOUNT (correct):", razorpayOrder.amount);
+
+                // FIX 5: Mismatch safety check
+                if (razorpayOrder.amount !== Math.round(totalAmount * 0.4) * 100) {
+                    console.error("❌ Amount mismatch detected!");
+                }
+
                 const options = {
-                    key: import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_dummy", // Enter the Key ID generated from the Dashboard
-                    amount: razorpayOrder.amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+                    key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+                    amount: razorpayOrder.amount, // ALWAYS use backend amount
                     currency: "INR",
                     name: "GlobeTrails",
                     description: "Advanced Deposit for Tour Booking",
-                    order_id: razorpayOrder.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+                    order_id: razorpayOrder.id,
                     handler: async function (responseFromRazorpay) {
                         try {
                             const verifyRes = await axios.post(`${import.meta.env.VITE_API_URL}/bookings/verify-payment`, {
@@ -146,21 +158,21 @@ const TourDetails = () => {
                             }, {
                                 headers: { Authorization: `Bearer ${tokens}` }
                             });
-                            
+
                             if (verifyRes.data.success) {
-                                toast.success("Payment successful! Booking confirmed.");
-                                navigate('/policy'); // Force navigate to policy
+                                toast.success("Deposit paid successfully! Awaiting admin confirmation.");
+                                navigate('/profile');
                             }
                         } catch (err) {
                             toast.error("Payment verification failed. Please contact support.");
                             console.error(err);
                             try {
                                 await axios.delete(`${import.meta.env.VITE_API_URL}/bookings/cancel-payment/${newBookingData._id}`, { headers: { Authorization: `Bearer ${tokens}` } });
-                            } catch (e) {}
+                            } catch (e) { }
                         }
                     },
                     modal: {
-                        ondismiss: async function() {
+                        ondismiss: async function () {
                             try {
                                 await axios.delete(`${import.meta.env.VITE_API_URL}/bookings/cancel-payment/${newBookingData._id}`, {
                                     headers: { Authorization: `Bearer ${tokens}` }
@@ -184,16 +196,23 @@ const TourDetails = () => {
                 const paymentObject = new window.Razorpay(options);
 
                 paymentObject.on('payment.failed', async function (response) {
-                     toast.error("Payment failed. Booking not complete.");
-                     try {
-                          await axios.delete(`${import.meta.env.VITE_API_URL}/bookings/cancel-payment/${newBookingData._id}`, {
-                              headers: { Authorization: `Bearer ${tokens}` }
-                          });
-                     } catch (e) {}
+                    console.error("❌ RAZORPAY PAYMENT FAILED:");
+                    console.error("Error Code:", response.error.code);
+                    console.error("Description:", response.error.description);
+                    console.error("Source:", response.error.source);
+                    console.error("Step:", response.error.step);
+                    console.error("Reason:", response.error.reason);
+                    console.error("Full Error:", JSON.stringify(response.error, null, 2));
+                    toast.error(`Payment failed: ${response.error.description}`);
+                    try {
+                        await axios.delete(`${import.meta.env.VITE_API_URL}/bookings/cancel-payment/${newBookingData._id}`, {
+                            headers: { Authorization: `Bearer ${tokens}` }
+                        });
+                    } catch (e) { }
                 });
 
                 paymentObject.open();
-                
+
             }
         } catch (error) {
             console.error(error);
@@ -363,12 +382,20 @@ const TourDetails = () => {
                                         <span>₹{serviceCharge}</span>
                                     </div>
                                     <div className="summary-total">
-                                        <span>Total</span>
+                                        <span>Total Tour Price</span>
                                         <span>₹{totalAmount}</span>
+                                    </div>
+                                    <div className="summary-row deposit-highlight" style={{ marginTop: '10px', color: '#27ae60', fontWeight: 'bold' }}>
+                                        <span>Pay Advance (40%)</span>
+                                        <span>₹{Math.round(totalAmount * 0.4)}</span>
+                                    </div>
+                                    <div className="summary-row" style={{ fontSize: '0.8rem', color: '#666' }}>
+                                        <span>Remaining Balance (60%)</span>
+                                        <span>₹{totalAmount - Math.round(totalAmount * 0.4)}</span>
                                     </div>
                                 </div>
 
-                                <button type="submit" className="btn-book-submit">Book Now</button>
+                                <button type="submit" className="btn-book-submit">Book Now (Pay Deposit)</button>
                             </form>
                         )}
                         <div className="cancellation-policy-note">

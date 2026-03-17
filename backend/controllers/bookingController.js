@@ -61,15 +61,16 @@ export const createBooking = async (req, res) => {
         };
 
         const razorpayOrder = await razorpayInstance.orders.create(options);
-        
+
         booking.razorpayDepositOrderId = razorpayOrder.id;
         await booking.save();
 
-        res.status(201).json({ 
-            success: true, 
-            message: "Booking initialized", 
+        res.status(201).json({
+            success: true,
+            message: "Booking initialized",
             data: booking,
-            razorpayOrder
+            razorpayOrder,
+            finalAmount: finalPrice
         });
     } catch (error) {
         res.status(400).json({ success: false, message: "Failed to create booking", error: error.message });
@@ -88,12 +89,11 @@ export const verifyPayment = async (req, res) => {
             .digest("hex");
 
         if (razorpay_signature === expectedSign) {
-            // Payment success
             const booking = await Booking.findByIdAndUpdate(
                 bookingId,
                 {
                     paymentStatus: "deposit_paid",
-                    inquiryStatus: "confirmed", // optionally confirm it here
+                    inquiryStatus: "pending", // stays pending until admin confirms
                     razorpayDepositPaymentId: razorpay_payment_id
                 },
                 { new: true }
@@ -133,7 +133,7 @@ export const createFullPaymentOrder = async (req, res) => {
         };
 
         const razorpayOrder = await razorpayInstance.orders.create(options);
-        
+
         booking.razorpayBalanceOrderId = razorpayOrder.id;
         await booking.save();
 
@@ -223,35 +223,49 @@ export const getAllBookings = async (req, res) => {
     }
 };
 
-// Update booking status
+// Update booking status (Admin: confirm or reject)
 export const updateBookingStatus = async (req, res) => {
     const { status } = req.body;
     try {
-        const booking = await Booking.findByIdAndUpdate(
-            req.params.id,
-            { inquiryStatus: status },
-            { new: true }
-        );
+        const booking = await Booking.findById(req.params.id)
+            .populate("tour", "title")
+            .populate("user", "username email");
+
         if (!booking) {
             return res.status(404).json({ success: false, message: "Booking not found" });
         }
 
-        // Send confirmation email if status changed to 'confirmed'
-        if (status === 'confirmed') {
-            // Populate tour and user to get details for email
-            const fullBooking = await Booking.findById(req.params.id)
-                .populate("tour", "title")
-                .populate("user", "username email");
+        booking.inquiryStatus = status;
 
+        // If admin REJECTS the booking, apply refund logic
+        if (status === 'rejected') {
+            const totalPaid = booking.paymentStatus === "full_paid" 
+                ? booking.finalPrice 
+                : (booking.paymentStatus === "deposit_paid" ? booking.depositAmount : 0);
+            
+            // Admin rejected = 100% refund of whatever was paid
+            const refundAmount = totalPaid;
+            booking.cancellationRefundAmount = refundAmount;
+            booking.paymentStatus = refundAmount > 0 ? "refunded" : booking.paymentStatus;
+        }
+
+        // If admin CONFIRMS, send confirmation email
+        if (status === 'confirmed') {
             await sendBookingConfirmationEmail(
-                fullBooking,
-                fullBooking.tour.title,
-                fullBooking.contactDetails.email || fullBooking.user.email,
-                fullBooking.user.username
+                booking,
+                booking.tour.title,
+                booking.contactDetails.email || booking.user.email,
+                booking.user.username
             );
         }
 
-        res.status(200).json({ success: true, message: "Booking status updated", data: booking });
+        await booking.save();
+
+        const message = status === 'rejected' 
+            ? `Booking rejected. Refund of ₹${booking.cancellationRefundAmount} will be processed.`
+            : `Booking ${status} successfully.`;
+
+        res.status(200).json({ success: true, message, data: booking });
     } catch (error) {
         res.status(400).json({ success: false, message: "Failed to update booking", error: error.message });
     }
@@ -276,7 +290,7 @@ export const cancelBooking = async (req, res) => {
         const diffInDays = Math.round(diffInTime / (1000 * 3600 * 24));
 
         let refundPercentage = 0;
-        
+
         if (diffInDays >= 30) {
             refundPercentage = 100;
         } else if (diffInDays >= 15) {
@@ -293,11 +307,11 @@ export const cancelBooking = async (req, res) => {
         booking.inquiryStatus = "cancelled";
         booking.paymentStatus = refundAmount > 0 ? "refunded" : booking.paymentStatus;
         booking.cancellationRefundAmount = refundAmount;
-        
+
         await booking.save();
 
-        res.status(200).json({ 
-            success: true, 
+        res.status(200).json({
+            success: true,
             message: `Booking cancelled successfully. Refund amount: ₹${refundAmount} (${refundPercentage}%)`,
             refundAmount
         });
