@@ -155,14 +155,14 @@ const TourDetails = () => {
                             toast.error("Payment verification failed. Please contact support.");
                             console.error(err);
                             try {
-                                await axios.delete(`${import.meta.env.VITE_API_URL}/bookings/${newBookingData._id}`, { headers: { Authorization: `Bearer ${tokens}` } });
+                                await axios.delete(`${import.meta.env.VITE_API_URL}/bookings/cancel-payment/${newBookingData._id}`, { headers: { Authorization: `Bearer ${tokens}` } });
                             } catch (e) {}
                         }
                     },
                     modal: {
                         ondismiss: async function() {
                             try {
-                                await axios.delete(`${import.meta.env.VITE_API_URL}/bookings/${newBookingData._id}`, {
+                                await axios.delete(`${import.meta.env.VITE_API_URL}/bookings/cancel-payment/${newBookingData._id}`, {
                                     headers: { Authorization: `Bearer ${tokens}` }
                                 });
                                 toast.error("Payment cancelled. Booking was not completed.");
@@ -186,7 +186,7 @@ const TourDetails = () => {
                 paymentObject.on('payment.failed', async function (response) {
                      toast.error("Payment failed. Booking not complete.");
                      try {
-                          await axios.delete(`${import.meta.env.VITE_API_URL}/bookings/${newBookingData._id}`, {
+                          await axios.delete(`${import.meta.env.VITE_API_URL}/bookings/cancel-payment/${newBookingData._id}`, {
                               headers: { Authorization: `Bearer ${tokens}` }
                           });
                      } catch (e) {}

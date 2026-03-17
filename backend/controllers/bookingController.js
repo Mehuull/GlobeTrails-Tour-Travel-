@@ -305,3 +305,16 @@ export const cancelBooking = async (req, res) => {
         res.status(500).json({ success: false, message: "Failed to cancel booking", error: error.message });
     }
 };
+
+// Permanently delete a booking (used when payment fails or user closes the razorpay modal before completing it)
+export const deleteBookingPermanently = async (req, res) => {
+    try {
+        const booking = await Booking.findOneAndDelete({ _id: req.params.id, user: req.userId, paymentStatus: "pending" });
+        if (!booking) {
+            return res.status(404).json({ success: false, message: "Booking not found or cannot be modified" });
+        }
+        res.status(200).json({ success: true, message: "Unpaid booking explicitly removed." });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Failed to remove unpaid booking", error: error.message });
+    }
+};
