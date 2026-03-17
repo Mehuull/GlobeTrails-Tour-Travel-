@@ -49,6 +49,25 @@ const BookingList = () => {
         }
     };
 
+    const getPaymentColor = (status) => {
+        switch (status) {
+            case 'deposit_paid': return '#f39c12';
+            case 'full_paid': return '#27ae60';
+            case 'refunded': return '#e74c3c';
+            default: return '#999';
+        }
+    };
+
+    const getPaymentLabel = (status) => {
+        switch (status) {
+            case 'deposit_paid': return 'Deposit Paid';
+            case 'full_paid': return 'Fully Paid';
+            case 'refunded': return 'Refunded';
+            case 'pending': return 'Pending';
+            default: return status;
+        }
+    };
+
     return (
         <div>
             <div className="content-header">
@@ -65,6 +84,7 @@ const BookingList = () => {
                             <th>Guests</th>
                             <th>Contact</th>
                             <th>Status</th>
+                            <th>Payment</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -107,6 +127,23 @@ const BookingList = () => {
                                     </span>
                                 </td>
                                 <td>
+                                    <span style={{
+                                        backgroundColor: getPaymentColor(booking.paymentStatus) + '20',
+                                        color: getPaymentColor(booking.paymentStatus),
+                                        padding: '4px 8px',
+                                        borderRadius: '4px',
+                                        fontWeight: 600,
+                                        fontSize: '12px'
+                                    }}>
+                                        {getPaymentLabel(booking.paymentStatus)}
+                                    </span>
+                                    {booking.depositAmount && (
+                                        <div style={{ fontSize: '11px', color: '#777', marginTop: '4px' }}>
+                                            Deposit: ₹{booking.depositAmount} | Balance: ₹{booking.balanceAmount}
+                                        </div>
+                                    )}
+                                </td>
+                                <td>
                                     {booking.inquiryStatus === 'pending' && (
                                         <>
                                             <button
@@ -132,7 +169,7 @@ const BookingList = () => {
                         ))}
                         {bookings.length === 0 && (
                             <tr>
-                                <td colSpan="7" style={{ textAlign: 'center', padding: '30px' }}>No bookings found.</td>
+                                <td colSpan="8" style={{ textAlign: 'center', padding: '30px' }}>No bookings found.</td>
                             </tr>
                         )}
                     </tbody>
