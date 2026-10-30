@@ -82,14 +82,32 @@ const TourDetails = () => {
         return new Promise((resolve) => {
             const script = document.createElement("script");
             script.src = "https://checkout.razorpay.com/v1/checkout.js";
-            script.onload = () => {
-                resolve(true);
-            };
-            script.onerror = () => {
-                resolve(false);
-            };
+            script.onload = () => resolve(true);
+            script.onerror = () => resolve(false);
             document.body.appendChild(script);
         });
+    };
+
+    const handleDownloadReceipt = async (bookingId, paymentType) => {
+        try {
+            const tokens = localStorage.getItem('accessToken');
+            const response = await axios.get(`${import.meta.env.VITE_API_URL}/bookings/receipt/${bookingId}/${paymentType}`, {
+                headers: { Authorization: `Bearer ${tokens}` },
+                responseType: 'blob'
+            });
+
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `Receipt_${paymentType}_${bookingId}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error("Download failed", error);
+            // Don't show toast error here as it might conflict with the success toast from payment
+        }
     };
 
     const handleBookingSchema = async (e) => {
@@ -160,7 +178,9 @@ const TourDetails = () => {
                             });
 
                             if (verifyRes.data.success) {
-                                toast.success("Deposit paid successfully! Awaiting admin confirmation.");
+                                toast.success("Deposit paid successfully!");
+                                // Trigger automatic download of receipt
+                                handleDownloadReceipt(newBookingData._id, 'deposit');
                                 navigate('/profile');
                             }
                         } catch (err) {
@@ -225,14 +245,17 @@ const TourDetails = () => {
 
     const totalAmount = Number(tour.pricePerPerson) * Number(bookingData.guest) + serviceCharge;
 
-    const getTodayDate = () => {
+    const getMinBookingDate = () => {
         const today = new Date();
+        // Add 11 days to today (Disabling today + 10 days)
+        today.setDate(today.getDate() + 11);
+
         const year = today.getFullYear();
         const month = String(today.getMonth() + 1).padStart(2, '0');
         const day = String(today.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
     };
-    const minDateAvailable = getTodayDate();
+    const minDateAvailable = getMinBookingDate();
 
     return (
         <div className="tour-details-page">

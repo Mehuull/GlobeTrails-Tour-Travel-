@@ -76,7 +76,7 @@ export const sendBookingInquiryEmail = async (booking, tourTitle, userEmail, use
     }
 };
 
-export const sendBookingConfirmationEmail = async (booking, tourTitle, userEmail, userName) => {
+export const sendBookingConfirmationEmail = async (booking, tourTitle, userEmail, userName, receiptBuffer = null) => {
     const balanceMsg = booking.balanceAmount ? `<p style="color: #d35400;"><strong>Reminder:</strong> A remaining balance of <strong>₹${booking.balanceAmount}</strong> is due at least 5 days before your trip. Please log in to your profile to complete the payment.</p>` : '';
 
     const mailOptions = {
@@ -95,6 +95,7 @@ export const sendBookingConfirmationEmail = async (booking, tourTitle, userEmail
                 <p style="color: #2f855a; line-height: 1.6;">
                     Your advanced deposit for <strong>${tourTitle}</strong> has been received and your booking is <strong>CONFIRMED</strong>. 
                 </p>
+                <p style="color: #555; font-size: 14px;">We've attached your payment receipt to this email for your records.</p>
             </div>
 
             <div style="margin: 20px 0;">
@@ -133,7 +134,14 @@ export const sendBookingConfirmationEmail = async (booking, tourTitle, userEmail
                 <p>&copy; 2026 GlobeTrails Travel Agency. All rights reserved.</p>
             </div>
         </div>
-        `
+        `,
+        attachments: receiptBuffer ? [
+            {
+                filename: `Receipt_Deposit_${booking._id}.pdf`,
+                content: receiptBuffer,
+                contentType: 'application/pdf'
+            }
+        ] : []
     };
 
     try {
@@ -144,7 +152,7 @@ export const sendBookingConfirmationEmail = async (booking, tourTitle, userEmail
     }
 };
 
-export const sendFullPaymentConfirmationEmail = async (booking, tourTitle, userEmail, userName) => {
+export const sendFullPaymentConfirmationEmail = async (booking, tourTitle, userEmail, userName, receiptBuffer = null) => {
     const mailOptions = {
         from: `"GlobeTrails" <${process.env.MAIL_USER}>`,
         to: userEmail,
@@ -162,13 +170,21 @@ export const sendFullPaymentConfirmationEmail = async (booking, tourTitle, userE
                     We have received your full payment of <strong>₹${booking.finalPrice}</strong> for <strong>${tourTitle}</strong>. You are all set for your trip!
                 </p>
                 <p style="color: #555;">Get ready for an amazing adventure starting on ${new Date(booking.preferredStartDate).toLocaleDateString()}.</p>
+                <p style="color: #555; font-size: 14px;">Your final payment receipt is attached to this email.</p>
             </div>
 
             <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; color: #999; font-size: 12px;">
                 <p>&copy; 2026 GlobeTrails Travel Agency. All rights reserved.</p>
             </div>
         </div>
-        `
+        `,
+        attachments: receiptBuffer ? [
+            {
+                filename: `Receipt_Full_${booking._id}.pdf`,
+                content: receiptBuffer,
+                contentType: 'application/pdf'
+            }
+        ] : []
     };
 
     try {

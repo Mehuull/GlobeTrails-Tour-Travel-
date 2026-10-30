@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { getData } from '@/context/userContext';
 import { toast } from 'sonner';
-import { User, Calendar, MapPin, Users, IndianRupee, Trash2, Clock, CreditCard, ShieldAlert } from 'lucide-react';
+import { User, Calendar, MapPin, Users, IndianRupee, Trash2, Clock, CreditCard, ShieldAlert, Download } from 'lucide-react';
 import './Profile.css';
 
 const Profile = () => {
@@ -106,6 +106,7 @@ const Profile = () => {
 
                             if (verifyRes.data.success) {
                                 toast.success("Full payment successful!");
+                                handleDownloadReceipt(bookingId, 'full');
                                 setBookings(prev => prev.map(b => b._id === bookingId ? { ...b, paymentStatus: "full_paid" } : b));
                             }
                         } catch (err) {
@@ -125,6 +126,28 @@ const Profile = () => {
             }
         } catch (error) {
             toast.error(error.response?.data?.message || "Failed to initiate payment");
+        }
+    };
+
+    const handleDownloadReceipt = async (bookingId, paymentType) => {
+        try {
+            const token = localStorage.getItem('accessToken');
+            const response = await axios.get(`${import.meta.env.VITE_API_URL}/bookings/receipt/${bookingId}/${paymentType}`, {
+                headers: { Authorization: `Bearer ${token}` },
+                responseType: 'blob'
+            });
+
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `Receipt_${paymentType}_${bookingId}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error("Download failed", error);
+            toast.error("Failed to download receipt");
         }
     };
 
@@ -233,6 +256,16 @@ const Profile = () => {
                                                     onClick={() => handlePayRemaining(booking._id)}
                                                 >
                                                     <CreditCard size={16} /> Pay {booking.balanceAmount ? `₹${booking.balanceAmount}` : 'Balance'}
+                                                </button>
+                                            )}
+
+                                            {booking.paymentStatus !== "pending" && booking.paymentStatus !== "refunded" && (
+                                                <button
+                                                    className="btn-download-receipt"
+                                                    onClick={() => handleDownloadReceipt(booking._id, booking.paymentStatus === 'full_paid' ? 'full' : 'deposit')}
+                                                    title="Download Payment Receipt"
+                                                >
+                                                    <Download size={16} /> Receipt
                                                 </button>
                                             )}
 

@@ -8,7 +8,8 @@ import {
     verifyPayment,
     createFullPaymentOrder,
     verifyFullPayment,
-    deleteBookingPermanently
+    deleteBookingPermanently,
+    downloadReceipt
 } from "../controllers/bookingController.js";
 import { isAuthenticated } from "../middleware/isAuthenticated.js";
 
@@ -18,6 +19,7 @@ router.post("/", isAuthenticated, createBooking);
 router.post("/verify-payment", isAuthenticated, verifyPayment);
 router.post("/create-full-payment", isAuthenticated, createFullPaymentOrder);
 router.post("/verify-full-payment", isAuthenticated, verifyFullPayment);
+router.get("/receipt/:bookingId/:paymentType", isAuthenticated, downloadReceipt);
 router.get("/my-bookings", isAuthenticated, getUserBookings);
 router.delete("/cancel-payment/:id", isAuthenticated, deleteBookingPermanently);
 router.delete("/:id", isAuthenticated, cancelBooking);

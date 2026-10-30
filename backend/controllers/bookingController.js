@@ -3,6 +3,7 @@ import { Tour } from "../models/Tour.js";
 import { sendBookingInquiryEmail, sendBookingConfirmationEmail, sendFullPaymentConfirmationEmail } from "../utils/bookingEmails.js";
 import Razorpay from "razorpay";
 import crypto from "crypto";
+import { generateReceipt } from "../utils/receiptGenerator.js";
 
 const razorpayInstance = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID || "rzp_test_dummykey",
@@ -12,6 +13,18 @@ const razorpayInstance = new Razorpay({
 export const createBooking = async (req, res) => {
     try {
         const { tour, preferredStartDate, guests, contactDetails, finalPrice } = req.body;
+
+        // Validation: Booking must be at least 10 days in advance
+        const minDate = new Date();
+        minDate.setDate(minDate.getDate() + 10);
+        minDate.setHours(23, 59, 59, 999); // End of the 10th day
+        
+        if (new Date(preferredStartDate) <= minDate) {
+            return res.status(400).json({
+                success: false,
+                message: "Tours must be booked at least 11 days in advance."
+            });
+        }
 
         // Check if user already has an active booking for this tour
         const existingBooking = await Booking.findOne({
@@ -99,15 +112,19 @@ export const verifyPayment = async (req, res) => {
                 { new: true }
             ).populate("tour", "title").populate("user", "username email");
 
-            // Optionally send confirmation email
+            // Generate receipt
+            const receiptBuffer = await generateReceipt(booking, booking.tour.title, 'deposit');
+
+            // Send confirmation email with receipt
             await sendBookingConfirmationEmail(
                 booking,
                 booking.tour.title,
                 booking.contactDetails.email || booking.user.email,
-                booking.user.username
+                booking.user.username,
+                receiptBuffer
             );
 
-            return res.status(200).json({ success: true, message: "Payment verified successfully", data: booking });
+            return res.status(200).json({ success: true, message: "Payment verified successfully", data: booking, receiptAvailable: true });
         } else {
             return res.status(400).json({ success: false, message: "Invalid signature sent!" });
         }
@@ -164,15 +181,19 @@ export const verifyFullPayment = async (req, res) => {
                 { new: true }
             ).populate("tour", "title").populate("user", "username email");
 
-            // Send full payment confirmation email
+            // Generate receipt
+            const receiptBuffer = await generateReceipt(booking, booking.tour.title, 'full');
+
+            // Send full payment confirmation email with receipt
             await sendFullPaymentConfirmationEmail(
                 booking,
                 booking.tour.title,
                 booking.user.email,
-                booking.user.username
+                booking.user.username,
+                receiptBuffer
             );
 
-            return res.status(200).json({ success: true, message: "Full payment verified successfully", data: booking });
+            return res.status(200).json({ success: true, message: "Full payment verified successfully", data: booking, receiptAvailable: true });
         } else {
             return res.status(400).json({ success: false, message: "Invalid signature sent!" });
         }
@@ -330,5 +351,34 @@ export const deleteBookingPermanently = async (req, res) => {
         res.status(200).json({ success: true, message: "Unpaid booking explicitly removed." });
     } catch (error) {
         res.status(500).json({ success: false, message: "Failed to remove unpaid booking", error: error.message });
+    }
+};
+// Download Receipt
+export const downloadReceipt = async (req, res) => {
+    try {
+        const { bookingId, paymentType } = req.params;
+        const booking = await Booking.findById(bookingId)
+            .populate("tour", "title")
+            .populate("user", "username email");
+
+        if (!booking) {
+            return res.status(404).json({ success: false, message: "Booking not found" });
+        }
+
+        // Check if user is authorized (either the owner or an admin)
+        const isOwner = booking.user._id.toString() === req.userId.toString();
+        const isAdmin = req.user?.role === 'admin' || req.user?.username === 'Admin';
+
+        if (!isOwner && !isAdmin) {
+            return res.status(403).json({ success: false, message: "Unauthorized to download this receipt" });
+        }
+
+        const receiptBuffer = await generateReceipt(booking, booking.tour.title, paymentType);
+        
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=Receipt_${paymentType}_${bookingId}.pdf`);
+        res.send(receiptBuffer);
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Failed to generate receipt", error: error.message });
     }
 };

@@ -189,28 +189,32 @@
 .booking-actions {
     margin-top: 20px;
     display: flex;
-    gap: 10px;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
 .btn-view-tour {
-    flex: 2;
-    padding: 8px;
+    flex: 1;
+    min-width: calc(50% - 4px);
+    padding: 10px 5px;
     border-radius: 10px;
     border: 1px solid #e9ecef;
     background: white;
     color: #2c3e50;
     font-weight: 600;
+    font-size: 0.85rem;
     cursor: pointer;
     transition: 0.3s;
 }
 
 .btn-cancel-booking {
     flex: 1;
+    min-width: calc(50% - 4px);
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 5px;
-    padding: 8px;
+    padding: 10px 5px;
     border-radius: 10px;
     border: 1px solid #ffeaea;
     background: #fff5f5;
@@ -264,12 +268,13 @@
 }
 
 .btn-pay-remaining {
-    flex: 1.5;
+    flex: 1;
+    min-width: calc(50% - 4px);
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 5px;
-    padding: 8px;
+    padding: 10px 5px;
     border-radius: 10px;
     border: 1px solid #d4edda;
     background: #e8f5e9;
@@ -283,3 +288,26 @@
 .btn-pay-remaining:hover {
     background: #c8e6c9;
 }
+
+.btn-download-receipt {
+    flex: 1;
+    min-width: calc(50% - 4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 10px 5px;
+    border-radius: 10px;
+    border: 1px solid #d1ecf1;
+    background: #e1f5fe;
+    color: #0288d1;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-download-receipt:hover {
+    background: #b3e5fc;
+    color: #01579b;
+}

@@ -1,6 +1,7 @@
 :root {
     --admin-primary: var(--orange-color);
-    --admin-secondary: #fff0eb; /* Light orange for hover states */
+    --admin-secondary: #fff0eb;
+    /* Light orange for hover states */
     --admin-accent: var(--orange-color);
     --admin-bg: #f4f7fe;
     --admin-text: #1e293b;
@@ -16,6 +17,7 @@
         opacity: 0;
         transform: translateY(10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -87,7 +89,8 @@
 .menu-item.active {
     background-color: var(--admin-primary);
     color: var(--admin-white);
-    box-shadow: 0 8px 20px rgba(239, 62, 24, 0.25); /* Subtle orange shadow */
+    box-shadow: 0 8px 20px rgba(239, 62, 24, 0.25);
+    /* Subtle orange shadow */
 }
 
 .sidebar-footer {
@@ -235,19 +238,28 @@
     background: #f1f5f9;
     color: #3b82f6;
 }
-.btn-edit:hover { background: #dbecfe; }
+
+.btn-edit:hover {
+    background: #dbecfe;
+}
 
 .btn-delete {
     background: #fef2f2;
     color: var(--admin-danger);
 }
-.btn-delete:hover { background: #fee2e2; }
+
+.btn-delete:hover {
+    background: #fee2e2;
+}
 
 .btn-view {
     background: #f3e8ff;
     color: #9333ea;
 }
-.btn-view:hover { background: #e9d5ff; }
+
+.btn-view:hover {
+    background: #e9d5ff;
+}
 
 /* Forms */
 .form-container {
@@ -305,6 +317,7 @@
     box-shadow: 0 6px 15px rgba(239, 62, 24, 0.2);
     transition: all 0.2s;
 }
+
 .btn-primary:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(239, 62, 24, 0.3);

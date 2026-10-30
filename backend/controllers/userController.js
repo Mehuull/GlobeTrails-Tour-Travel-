@@ -7,7 +7,8 @@ import jwt from "jsonwebtoken"
 
 export const registerUser = async (req, res) => {
     try {
-        const { username, email, password } = req.body;
+        const { username, password } = req.body;
+        const email = req.body.email?.trim().toLowerCase();
         if (!username || !email || !password) {
             return res.status(400).json({
                 success: false,
@@ -98,7 +99,8 @@ export const verification = async (req, res) => {
 
 export const loginUser = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { password } = req.body;
+        const email = req.body.email?.trim().toLowerCase();
         if (!email || !password) {
             return res.status(400).json({
                 success: false,
@@ -112,11 +114,13 @@ export const loginUser = async (req, res) => {
                 message: "Unauthorized access"
             })
         }
-        const passwordCheck = await bcrypt.compare(password, user.password)
+        const passwordCheck = user.password
+            ? await bcrypt.compare(password, user.password)
+            : false;
         if (!passwordCheck) {
-            return res.status(402).json({
+            return res.status(401).json({
                 success: false,
-                message: "Incorrect Password"
+                message: "Invalid email or password"
             })
         }
 
